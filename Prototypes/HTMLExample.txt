@@ -1,0 +1,42 @@
+﻿            DOMElement html = new DOMElement() {
+                Type = TagType.Opening,
+                TagCode = "html",
+                TagName = "html",
+                Children = {
+                    new DOMElement() {
+                        Type = TagType.Opening,
+                        TagCode = "head",
+                        TagName = "head",
+                        Children = {
+                            new DOMElement() {
+                                Type = TagType.Opening,
+                                TagCode = "title",
+                                TagName = "title",
+                                Children = {
+                                    new DOMElement() {
+                                        Type = TagType.Text,
+                                        Content = "Page title"
+                                    }
+                                }
+                            },
+                            new DOMElement() {
+                                Type = TagType.Closing,
+                                TagCode = "/title",
+                                TagName = "title"
+                            }
+                        }
+                    },
+                    new DOMElement() {
+                        Type = TagType.Closing,
+                        TagCode = "/head",
+                        TagName = "head"
+                    }
+                }
+            };
+
+            tree.Add(html);
+            tree.Add(new DOMElement() {
+                Type = TagType.Closing,
+                TagCode = "/html",
+                TagName = "html"
+            });
