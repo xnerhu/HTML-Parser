@@ -86,7 +86,6 @@ namespace HTMLParser {
             List<DOMElement> parentsList = new List<DOMElement>();
 
             int openedTags = 0;
-            int lastLoopIndex = 0;
 
             for (int i = 0; i < tagsList.Count; i++) {
                 DOMElement element = tagsList[i];
@@ -117,7 +116,6 @@ namespace HTMLParser {
                     else if (element.Type == TagType.Closing) {
                         // After removing latest parent, get new latest parent
                         DOMElement latestParent = parentsList[parentsList.Count - 1];
-                        bool isErr = false;
                         
                         if (latestParent.TagName != element.TagName) {
                             latestParent.HelperText = i.ToString();
@@ -131,10 +129,6 @@ namespace HTMLParser {
 
                             parentsList[parentsList.Count - 2].Children.Add(closingTag);
                             parentsList.Remove(parentsList[parentsList.Count - 2]);
-
-                            lastLoopIndex = i;
-
-                            isErr = true;
                         }
 
                         openedTags--;
@@ -154,18 +148,6 @@ namespace HTMLParser {
 
             Console.ForegroundColor = openedTags > 0 ? ConsoleColor.DarkRed : ConsoleColor.DarkGreen;
             Console.WriteLine("\n\nDocument is " + (openedTags > 0 ? "invalid" : "valid") + " (" + openedTags + ")");
-
-            /*
-            if (openedTags > 0 && false) {
-                List<DOMElement> _tagsList = TagUtils.GetTagsListFromDOMTree(tree);
-                _tagsList.AddRange(TagUtils.GetElementsFromList(tagsList, lastLoopIndex, tagsList.Count));
-
-                List<DOMElement> newTree = GetDOMTree(_tagsList);
-
-                Console.WriteLine("\n\n\n\n\nx");
-                Utils.WriteDOMTree(newTree);
-            }
-            */
 
             return tree;
         }
