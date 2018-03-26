@@ -46,6 +46,15 @@ namespace HTMLParser {
                         TagEndIndex = tagEndIndex
                     };
 
+                    if (element.Type == TagType.Opening) {
+                        for (int l = 0; l < HTMLSelfClosingTags.list.Count; l++) {
+                            if (element.TagName == HTMLSelfClosingTags.list[l]) {
+                                element.Type = TagType.SelfClosing;
+                                break;
+                            }
+                        }
+                    }
+
                     // Tags that are disabling parsing for until they are closed
                     if (element.TagName == "script" || element.TagName == "style") {
                         if (element.Type == TagType.Opening && addNewElements) {
@@ -61,10 +70,10 @@ namespace HTMLParser {
 
                     // Get text between tags
                     if (tags.Count > 0 && addNewElements) {
-                        DOMElement latest = tags[tags.Count - 1];
+                        DOMElement last = tags[tags.Count - 1];
 
-                        int startIndex = latest.TagEndIndex + 1;
-                        int endIndex = element.TagStartIndex - latest.TagEndIndex - 1;
+                        int startIndex = last.TagEndIndex + 1;
+                        int endIndex = element.TagStartIndex - last.TagEndIndex - 1;
 
                         string content = source.Substring(startIndex, endIndex).Trim();
 
@@ -74,7 +83,11 @@ namespace HTMLParser {
                                 Content = content
                             };
 
-                            latest.Children.Add(text);
+                            if (last.Type == TagType.SelfClosing) {
+                                last = tags[tags.Count - 2];
+                            }
+
+                            last.Children.Add(text);
                         }
                     }
 
@@ -114,39 +127,41 @@ namespace HTMLParser {
                     if (element.Type == TagType.Opening) {
                         parentsList.Add(element);
                     }
-                } else {
-                    // For every opening tag
-                    // add it as last parent's child
-                    // and select it as a new parent
-                    if (element.Type == TagType.Opening) {
-                        // Add the child to last parent
-                        lastParent.Children.Add(element);
-                        // Add new parent
-                        parentsList.Add(element);
-                        openedTags++;
+                }
+                // For every closing tag
+                // remove last parent from parentsList
+                // add closing tag as DOMElement to tree
+                else if (element.Type == TagType.Closing) {
+                    if (element.TagName == lastParent.TagName) {
+                        parentsList.Remove(lastParent);
+                        parentsList[parentsList.Count - 1].Children.Add(element);
+                    } else {
+                        DOMElement closingTag = new DOMElement() {
+                            Type = TagType.Closing,
+                            TagCode = "/" + lastParent.TagName,
+                            TagName = lastParent.TagName
+                        };
+
+                        parentsList.Remove(lastParent);
+                        parentsList[parentsList.Count - 1].Children.Add(closingTag);
+
+                        i--;
                     }
-                    // For every closing tag
-                    // remove last parent from parentsList
-                    // add closing tag as DOMElement to tree
-                    else if (element.Type == TagType.Closing) {
-                        if (element.TagName == lastParent.TagName) {
-                            parentsList.Remove(lastParent);
-                            parentsList[parentsList.Count - 1].Children.Add(element);                            
-                        } else {
-                            DOMElement closingTag = new DOMElement() {
-                                Type = TagType.Closing,
-                                TagCode = "/" + lastParent.TagName,
-                                TagName = lastParent.TagName
-                            };
 
-                            parentsList.Remove(lastParent);
-                            parentsList[parentsList.Count - 1].Children.Add(closingTag);
-
-                            i--;
-                        }
-
-                        openedTags--;
-                    }
+                    openedTags--;
+                }
+                // For every opening tag
+                // add it as last parent's child
+                // and select it as a new parent
+                else if (element.Type == TagType.Opening) {
+                    // Add the child to last parent
+                    lastParent.Children.Add(element);
+                    // Add new parent
+                    parentsList.Add(element);
+                    openedTags++;
+                }
+                else if (element.Type == TagType.SelfClosing) {
+                    lastParent.Children.Add(element);
                 }
             }
 

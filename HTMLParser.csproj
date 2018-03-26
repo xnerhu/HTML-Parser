@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Defaults\HTMLSelfClosingTags.cs" />
     <Compile Include="Defaults\Paths.cs" />
     <Compile Include="Enums\TagType.cs" />
     <Compile Include="Objects\HTMLDocument.cs" />
