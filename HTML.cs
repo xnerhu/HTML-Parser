@@ -86,6 +86,7 @@ namespace HTMLParser {
             List<DOMElement> parentsList = new List<DOMElement>();
 
             int openedTags = 0;
+            bool autoClosed = false;
 
             for (int i = 0; i < tagsList.Count; i++) {
                 DOMElement element = tagsList[i];
@@ -114,29 +115,36 @@ namespace HTMLParser {
                     // remove latest parent from parentsList
                     // add closing tag as DOMElement to tree
                     else if (element.Type == TagType.Closing) {
-                        // After removing latest parent, get new latest parent
-                        DOMElement latestParent = parentsList[parentsList.Count - 1];
-                        
-                        if (latestParent.TagName != element.TagName) {
-                            latestParent.HelperText = i.ToString();
+                        DOMElement lastParent = parentsList[parentsList.Count - 1];
+
+                        if (lastParent.TagName == element.TagName) {
+                            openedTags--;
+                            // Remove last parent
+                            if (!autoClosed) {
+                                parentsList.Remove(lastParent);
+                            } 
+                            // If there is any parent left
+                            if (parentsList.Count > 0 && !autoClosed) {
+                                parentsList[parentsList.Count - 1].Children.Add(element);
+                            }
+
+                            autoClosed = false;
+                        } else {
+                            lastParent.HelperText = i.ToString();
                             element.HelperText = i.ToString();
 
                             DOMElement closingTag = new DOMElement() {
                                 Type = TagType.Closing,
-                                TagCode = "/" + latestParent.TagName,
-                                TagName = latestParent.TagName,
+                                TagCode = "/" + lastParent.TagName,
+                                TagName = lastParent.TagName,
+                                HelperText = "x"
                             };
 
                             parentsList[parentsList.Count - 2].Children.Add(closingTag);
-                            parentsList.Remove(parentsList[parentsList.Count - 2]);
-                        }
+                            parentsList.Remove(parentsList[parentsList.Count - 1]);
 
-                        openedTags--;
-                        // Remove latest parent
-                        parentsList.Remove(latestParent);
-                        // If there is any parent left
-                        if (parentsList.Count > 0) {
-                            parentsList[parentsList.Count - 1].Children.Add(element);
+                            i--;
+                            autoClosed = true;
                         }
                     }
                 }

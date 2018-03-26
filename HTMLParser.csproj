@@ -50,7 +50,6 @@
     <Compile Include="Objects\DOMElement.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Prototypes\parser.cs" />
     <Compile Include="Utils\FileManager.cs" />
     <Compile Include="Utils\TagUtils.cs" />
     <Compile Include="Utils\Utils.cs" />
@@ -62,9 +61,6 @@
     <Content Include="Assets\index.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Prototypes\21.03.txt" />
-    <Content Include="Prototypes\HTMLExample.txt" />
-    <Content Include="Prototypes\parser2%28scriptandstyle%29.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
