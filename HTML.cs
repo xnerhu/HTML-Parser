@@ -6,7 +6,10 @@ namespace HTMLParser {
         public static List<DOMElement> Parse(string source) {
             source = Utils.ClearBreakingCharacters(source);
 
-            List<DOMElement> tree = GetDOMTree(GetTagsList(source));
+            int parsingFromSourceTime = 0;
+
+            List<DOMElement> tagsList = GetTagsList(source, ref parsingFromSourceTime);
+            List<DOMElement> tree = GetDOMTree(tagsList, parsingFromSourceTime);
 
             return tree;
         }
@@ -14,8 +17,10 @@ namespace HTMLParser {
         /// <summary>
         /// Parses source code into objects
         /// </summary>
-        public static List<DOMElement> GetTagsList(string source) {
+        public static List<DOMElement> GetTagsList(string source, ref int parsingTime) {
             List<DOMElement> tags = new List<DOMElement>();
+
+            DateTime timeBeforeParsing = DateTime.Now;
 
             bool addNewElements = true;
             int startParsingIndex = -1;
@@ -78,15 +83,23 @@ namespace HTMLParser {
                 }
             }
 
+            DateTime timeAfterParsing = DateTime.Now;
+
+            parsingTime = timeAfterParsing.Millisecond - timeBeforeParsing.Millisecond;
+
             return tags;
         }
 
-        public static List<DOMElement> GetDOMTree(List<DOMElement> tagsList) {
+        /// <summary>
+        /// Creates DOM tree from tags list
+        /// </summary>
+        public static List<DOMElement> GetDOMTree(List<DOMElement> tagsList, int parsingFromSourceTime = -1) {
             List<DOMElement> tree = new List<DOMElement>();
             List<DOMElement> parentsList = new List<DOMElement>();
 
             int openedTags = 0;
-            bool autoClosed = false;
+
+            DateTime timeBeforeTreeParsing = DateTime.Now;
 
             for (int i = 0; i < tagsList.Count; i++) {
                 DOMElement element = tagsList[i];
@@ -113,48 +126,53 @@ namespace HTMLParser {
                         openedTags++;
                     }
                     // For every closing tag
-                    // remove latest parent from parentsList
+                    // remove last parent from parentsList
                     // add closing tag as DOMElement to tree
                     else if (element.Type == TagType.Closing) {
-                        if (lastParent.TagName == element.TagName) {
-                            openedTags--;
-                            // Remove last parent
-                            if (!autoClosed) {
-                                parentsList.Remove(lastParent);
-                            } 
-                            // If there is any parent left
-                            if (parentsList.Count > 0 && !autoClosed) {
-                                parentsList[parentsList.Count - 1].Children.Add(element);
-                            }
-
-                            autoClosed = false;
+                        if (element.TagName == lastParent.TagName) {
+                            parentsList.Remove(lastParent);
+                            parentsList[parentsList.Count - 1].Children.Add(element);                            
                         } else {
-                            lastParent.HelperText = i.ToString();
-                            element.HelperText = i.ToString();
-
                             DOMElement closingTag = new DOMElement() {
                                 Type = TagType.Closing,
                                 TagCode = "/" + lastParent.TagName,
-                                TagName = lastParent.TagName,
-                                HelperText = "x"
+                                TagName = lastParent.TagName
                             };
 
-                            parentsList[parentsList.Count - 2].Children.Add(closingTag);
-                            parentsList.Remove(parentsList[parentsList.Count - 1]);
+                            parentsList.Remove(lastParent);
+                            parentsList[parentsList.Count - 1].Children.Add(closingTag);
 
                             i--;
-                            autoClosed = true;
                         }
+
+                        openedTags--;
                     }
                 }
             }
 
-            // Test output
+            DateTime timeAfterTreeParsing = DateTime.Now;
+
+            // Write DOM tree into console
             Console.WriteLine();
             Utils.WriteDOMTree(tree);
 
-            Console.ForegroundColor = openedTags > 0 ? ConsoleColor.DarkRed : ConsoleColor.DarkGreen;
-            Console.WriteLine("\n\nDocument is " + (openedTags > 0 ? "invalid" : "valid") + " (" + openedTags + ")");
+            // Opened tags
+            Utils.Log("\n\nDocument is: ",
+                (openedTags > 0 ? "Invalid" : "Valid") + " (" + openedTags + ")",
+                openedTags > 0 ? ConsoleColor.Red : ConsoleColor.Green
+            );
+
+            if (parsingFromSourceTime != -1) {
+                // DOM tree parsing time in ms
+                Utils.Log("\nTime of parsing from source code into tags list: ",
+                    parsingFromSourceTime + "ms"
+                );
+            }
+
+            // DOM tree parsing time in ms
+            Utils.Log("\nTime of parsing into DOM tree : ",
+                (timeAfterTreeParsing.Millisecond - timeBeforeTreeParsing.Millisecond).ToString() + "ms"
+            );
 
             return tree;
         }

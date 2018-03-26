@@ -59,5 +59,12 @@ namespace HTMLParser {
                 }
             }
         }
+
+        public static void Log (string description, string value, ConsoleColor valueColor = ConsoleColor.Green, ConsoleColor descriptionColor = ConsoleColor.Cyan) {
+            Console.ForegroundColor = descriptionColor;
+            Console.Write(description);
+            Console.ForegroundColor = valueColor;
+            Console.Write(value);
+        }
     }
 }

@@ -14,7 +14,7 @@ namespace HTMLParser {
         public List<Attribute> Attributes = new List<Attribute>();
 
         public DOMElement () {
-
+            
         }
     }
 }
