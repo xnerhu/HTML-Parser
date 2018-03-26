@@ -116,7 +116,35 @@ namespace HTMLParser {
                     // remove latest parent from parentsList
                     // add closing tag as DOMElement to tree
                     else if (element.Type == TagType.Closing) {
+                        if (lastParent.TagName == element.TagName) {
+                            openedTags--;
+                            // Remove last parent
+                            if (!autoClosed) {
+                                parentsList.Remove(lastParent);
+                            } 
+                            // If there is any parent left
+                            if (parentsList.Count > 0 && !autoClosed) {
+                                parentsList[parentsList.Count - 1].Children.Add(element);
+                            }
 
+                            autoClosed = false;
+                        } else {
+                            lastParent.HelperText = i.ToString();
+                            element.HelperText = i.ToString();
+
+                            DOMElement closingTag = new DOMElement() {
+                                Type = TagType.Closing,
+                                TagCode = "/" + lastParent.TagName,
+                                TagName = lastParent.TagName,
+                                HelperText = "x"
+                            };
+
+                            parentsList[parentsList.Count - 2].Children.Add(closingTag);
+                            parentsList.Remove(parentsList[parentsList.Count - 1]);
+
+                            i--;
+                            autoClosed = true;
+                        }
                     }
                 }
             }
