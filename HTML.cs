@@ -90,6 +90,7 @@ namespace HTMLParser {
 
             for (int i = 0; i < tagsList.Count; i++) {
                 DOMElement element = tagsList[i];
+                DOMElement lastParent = parentsList.Count > 0 ? parentsList[parentsList.Count - 1] : null;
 
                 // Add tag that isn't any tag's child
                 // For example <html> is first tag in a document so it isn't any tag's child
@@ -102,11 +103,11 @@ namespace HTMLParser {
                     }
                 } else {
                     // For every opening tag
-                    // add it as latest parent's child
+                    // add it as last parent's child
                     // and select it as a new parent
                     if (element.Type == TagType.Opening) {
-                        // Add the child to latest parent
-                        parentsList[parentsList.Count - 1].Children.Add(element);
+                        // Add the child to last parent
+                        lastParent.Children.Add(element);
                         // Add new parent
                         parentsList.Add(element);
                         openedTags++;
@@ -115,37 +116,7 @@ namespace HTMLParser {
                     // remove latest parent from parentsList
                     // add closing tag as DOMElement to tree
                     else if (element.Type == TagType.Closing) {
-                        DOMElement lastParent = parentsList[parentsList.Count - 1];
 
-                        if (lastParent.TagName == element.TagName) {
-                            openedTags--;
-                            // Remove last parent
-                            if (!autoClosed) {
-                                parentsList.Remove(lastParent);
-                            } 
-                            // If there is any parent left
-                            if (parentsList.Count > 0 && !autoClosed) {
-                                parentsList[parentsList.Count - 1].Children.Add(element);
-                            }
-
-                            autoClosed = false;
-                        } else {
-                            lastParent.HelperText = i.ToString();
-                            element.HelperText = i.ToString();
-
-                            DOMElement closingTag = new DOMElement() {
-                                Type = TagType.Closing,
-                                TagCode = "/" + lastParent.TagName,
-                                TagName = lastParent.TagName,
-                                HelperText = "x"
-                            };
-
-                            parentsList[parentsList.Count - 2].Children.Add(closingTag);
-                            parentsList.Remove(parentsList[parentsList.Count - 1]);
-
-                            i--;
-                            autoClosed = true;
-                        }
                     }
                 }
             }

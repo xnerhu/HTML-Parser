@@ -13,6 +13,7 @@ Sign out
 layout-engine/.gitignore
 32f200c  on 10 Oct 2017
 @Sential Sential Create .gitignore
+[Pp]rototypes/
      
 289 lines (234 sloc)  4.72 KB
 ## Ignore Visual Studio temporary files, build results, and
