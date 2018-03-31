@@ -61,19 +61,37 @@ namespace HTMLParser {
                 DOMElement element = elements[i];
 
                 if (element.Type == TagType.Text) {
-                    Console.ForegroundColor = ConsoleColor.White;
+                    ConsoleColor contentColor = ConsoleColor.White;
+
+                    if (parent != null) {
+                        if (parent.TagName == "script") {
+                            contentColor = ConsoleColor.Yellow;
+                        } else if (parent.TagName == "style") {
+                            contentColor = ConsoleColor.Blue;
+                        }
+                    }
+
+                    Console.ForegroundColor = contentColor;
 
                     Console.WriteLine(gap + element.Content);
                 } else {
-                    ConsoleColor tagColor = ConsoleColor.Green;
-                    ConsoleColor attributeColor = ConsoleColor.Cyan;
-                    ConsoleColor attributeValueColor = ConsoleColor.DarkCyan;
+                    ConsoleColor defaultTagColor = ConsoleColor.Green;
+                    ConsoleColor defaultAttributeColor = ConsoleColor.Cyan;
+                    ConsoleColor defaultAttributeValueColor = ConsoleColor.DarkCyan;
+
+                    ConsoleColor tagColor = defaultTagColor;
+
+                    if (element.TagName == "script") {
+                        tagColor = ConsoleColor.DarkYellow;
+                    } else if (element.TagName == "style") {
+                        tagColor = ConsoleColor.DarkBlue;
+                    }
 
                     Console.ForegroundColor = tagColor;
                     Console.Write(gap + "<" + (element.Type == TagType.Closing ? "/" : "") + element.TagName);
                     
                     if (element.Type ==  TagType.Opening || element.Type == TagType.SelfClosing) {
-                        Console.ForegroundColor = attributeColor;
+                        Console.ForegroundColor = defaultAttributeColor;
 
                         for (int a = 0; a < element.Attributes.Count; a++) {
                             DOMElementAttribute attribute = element.Attributes[a];
@@ -82,12 +100,13 @@ namespace HTMLParser {
 
                             if (attribute.Value.Length != 0) {
                                 Console.Write('=');
-                                Console.ForegroundColor = attributeValueColor;
+                                Console.ForegroundColor = defaultAttributeValueColor;
                                 Console.Write('"' + attribute.Value + '"');
-                                Console.ForegroundColor = attributeColor;
+                                Console.ForegroundColor = defaultAttributeColor;
                             }
                         }
                     }
+
 
                     Console.ForegroundColor = tagColor;
                     Console.Write(">");
