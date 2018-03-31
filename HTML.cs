@@ -46,13 +46,17 @@ namespace HTMLParser {
                         TagEndIndex = tagEndIndex
                     };
 
-                    if (element.Type == TagType.Opening) {
+                    if (element.Type == TagType.Opening) { 
                         for (int l = 0; l < HTMLSelfClosingTags.list.Count; l++) {
                             if (element.TagName == HTMLSelfClosingTags.list[l]) {
                                 element.Type = TagType.SelfClosing;
                                 break;
                             }
                         }
+                    }
+
+                    if (element.Type == TagType.Opening || element.Type == TagType.SelfClosing) {
+                        element.Attributes = Attributes.Get(element);
                     }
 
                     // Tags that are disabling parsing for until they are closed

@@ -60,11 +60,28 @@ namespace HTMLParser {
             }
         }
 
+        public static void WriteAttributes(List<DOMElementAttribute> attributesList) {
+            foreach (DOMElementAttribute attribute in attributesList) {
+                Utils.Log(attribute.Property + ": ", attribute.Value + "\n", ConsoleColor.Cyan, ConsoleColor.DarkCyan);
+            }
+        }
+
         public static void Log (string description, string value, ConsoleColor valueColor = ConsoleColor.Green, ConsoleColor descriptionColor = ConsoleColor.Cyan) {
             Console.ForegroundColor = descriptionColor;
             Console.Write(description);
             Console.ForegroundColor = valueColor;
             Console.Write(value);
+        }
+
+        public static List<int> GetIndexes(string parent, string str) {
+            List<int> indexes = new List<int>();
+            int i = -1;
+
+            while ((i = parent.IndexOf(str, i + 1)) != -1) {
+                indexes.Add(i);
+            }
+
+            return indexes;
         }
     }
 }

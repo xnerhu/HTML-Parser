@@ -11,7 +11,7 @@ namespace HTMLParser {
         public string HelperText;
 
         public List<DOMElement> Children = new List<DOMElement>();
-        public List<Attribute> Attributes = new List<Attribute>();
+        public List<DOMElementAttribute> Attributes = new List<DOMElementAttribute>();
 
         public DOMElement () {
             
