@@ -60,23 +60,40 @@ namespace HTMLParser {
 
                 DOMElement element = elements[i];
 
-                string output = gap;
+                if (element.Type == TagType.Text) {
+                    Console.ForegroundColor = ConsoleColor.White;
 
-                if (element.Type != TagType.Text) {
-                    output += "<" + element.TagCode + ">" + " " + element.HelperText;
+                    Console.WriteLine(gap + element.Content);
                 } else {
-                    output += element.Content;
+                    ConsoleColor tagColor = ConsoleColor.Green;
+                    ConsoleColor attributeColor = ConsoleColor.Cyan;
+                    ConsoleColor attributeValueColor = ConsoleColor.DarkCyan;
+
+                    Console.ForegroundColor = tagColor;
+                    Console.Write(gap + "<" + (element.Type == TagType.Closing ? "/" : "") + element.TagName);
+                    
+                    if (element.Type ==  TagType.Opening || element.Type == TagType.SelfClosing) {
+                        Console.ForegroundColor = attributeColor;
+
+                        for (int a = 0; a < element.Attributes.Count; a++) {
+                            DOMElementAttribute attribute = element.Attributes[a];
+
+                            Console.Write(" " + attribute.Property);
+
+                            if (attribute.Value.Length != 0) {
+                                Console.Write('=');
+                                Console.ForegroundColor = attributeValueColor;
+                                Console.Write('"' + attribute.Value + '"');
+                                Console.ForegroundColor = attributeColor;
+                            }
+                        }
+                    }
+
+                    Console.ForegroundColor = tagColor;
+                    Console.Write(">");
+                    Console.WriteLine();
                 }
 
-                ConsoleColor color = element.Type == TagType.Text ? ConsoleColor.Green : ConsoleColor.Red;
-
-                if (parent != null) {
-                    if (parent.TagName == "script") color = ConsoleColor.DarkYellow;
-                    else if (parent.TagName == "style") color = ConsoleColor.Blue;
-                }
-
-                Console.ForegroundColor = color;
-                Console.WriteLine(output);
 
                 if (elements[i].Children.Count > 0) {
                     WriteDOMTree(elements[i].Children, level + 1, elements[i]);
