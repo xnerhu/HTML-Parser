@@ -14,7 +14,8 @@ namespace HTMLParser {
             "meta",
             "param",
             "source",
-            "track"
+            "track",
+            "link"
         };
     }
 }

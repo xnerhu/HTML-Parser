@@ -6,15 +6,26 @@ namespace HTMLParser {
         private static string HTMLPageContent = "";
         private static HTMLDocument Document;
 
-        static void Main(string[] args) {
+        private static void Main(string[] args) {
             Console.OutputEncoding = Encoding.UTF8;
 
-            // Get source code
+            // Get a source code
             HTMLPageContent = FileManager.ReadFile(Paths.MainHTMLDocument);
-            // Get DOM tree
+            // Get a DOM tree
             Document = new HTMLDocument(HTMLPageContent);
 
-            Console.ReadKey();
+            // Write the DOM tree and the statistics
+            DOMPrinter.WriteDOMTree(Document.DOMTree);
+            WriteStatistics();
+
+            Console.ReadLine();
+        }
+
+        private static void WriteStatistics() {
+            Utils.Log("\n\nTime of parsing source code to tags list",
+                Document.Stats.SourceCodeParsingTime + "ms");
+            Utils.Log("Time of parsing to a DOM tree",
+                Document.Stats.DOMTreeParsingTime + "ms");
         }
     }
 }

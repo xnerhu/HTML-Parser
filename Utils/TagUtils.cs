@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace HTMLParser {
     public static class TagUtils {
-        public static TagType GetType(string str) {
-            if (str[0] == '/') {
-                return TagType.Closing;
-            } else if (str[str.Length - 1] == '/') {
-                return TagType.SelfClosing;
-            }
+        public static TagType GetType(string source) {
+            if (source[0] == '/') return TagType.Closing;
+            else if (source[source.Length - 1] == '/') return TagType.SelfClosing;
 
             return TagType.Opening;
         }
@@ -17,64 +13,32 @@ namespace HTMLParser {
             return source.Substring(startIndex + 1, endIndex - startIndex - 1);
         }
 
-        public static string GetName(string code) {
-            if (code.Length == 0) return null;
+        public static string GetName(string source) {
+            if (source.Length == 0) return null;
 
-            char firstChar = code[0];
             int startIndex = 0;
             int endIndex = 0;
 
-            // TODO: Comments support
-            if (firstChar == '/') startIndex++;
+            if (source[0] == '/') startIndex++;
 
-            for (int i = startIndex; i < code.Length; i++) {
-                bool isCharSpace = code[i] == ' ';
+            for (int i = startIndex; i < source.Length; i++) {
+                bool isCharSpace = source[i] == ' ';
 
-                if (isCharSpace || i + 1 == code.Length) {
+                if (isCharSpace || i + 1 == source.Length) {
                     endIndex = isCharSpace ? i - 1 : i;
                     break;
                 }
             }
 
-            return code.Substring(startIndex, endIndex - startIndex + 1).ToLower();
+            return source.Substring(startIndex, endIndex - startIndex + 1).ToLower();
         }
 
-        public static List<DOMElement> GetTagsListFromDOMTree (List<DOMElement> tree) {
-            List<DOMElement> list = new List<DOMElement>();
-
-            for (int i = 0; i < tree.Count; i++) {
-                DOMElement element = tree[i];
-
-                list.Add(element);
-
-                if (element.Children.Count > 0) {
-                    List<DOMElement> children = GetTagsListFromDOMTree(element.Children);
-
-                    for (int c = 0; c < children.Count; c++) {
-                        if (children[c].TagCode != null) {
-                            list.Add(children[c]);
-                        }
-                    }
-                }
+        public static int GetOpeningTagIndex(List<OpeningTag> collection, string tagName) {
+            for (int i = 0; i < collection.Count; i++) {
+                if (collection[i].TagName == tagName) return i;
             }
 
-            return list;
-        }
-
-        public static List<DOMElement> GetElementsFromList(List<DOMElement> list, int startIndex, int endIndex) {
-            List<DOMElement> elements = new List<DOMElement>();
-
-            if (startIndex > endIndex) {
-                throw new Exception("Start index is greater than end index");
-            } else if (list.Count < endIndex) {
-                throw new Exception("End index is greather than list size");
-            }
-
-            for (int i = startIndex; i < endIndex; i++) {
-                elements.Add(list[i]);
-            }
-
-            return elements;
+            return -1;
         }
     }
 }
