@@ -31,14 +31,20 @@ namespace HTMLParser {
                     Console.ForegroundColor = tagColor;
 
                     // Write tag name
-                    Console.Write("<" + element.TagName);
+                    Console.Write("<" + (element.Type == TagType.Closing ? "/" : "") + element.TagName);
 
                     // Write attributes
                     if (element.Attributes.Count > 0) {
                         WriteAttributes(element.Attributes, true, true);
                     }
 
-                    Console.Write((element.Type == TagType.Closing ? " /" : "") + ">");
+                    if (element.HelperText != null) {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.Write(" | " + element.HelperText);
+                        Console.ForegroundColor = tagColor;
+                    }
+
+                    Console.Write(">");
 
                     // Write children
                     if (elements[i].Children.Count > 0) {

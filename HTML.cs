@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace HTMLParser {
@@ -151,10 +152,6 @@ namespace HTMLParser {
                     } else {
                         lastOpeningTag.Count++;
                     }
-
-                    if (lastOpeningTag != null) {
-                        element.HelperText = lastOpeningTag.Count.ToString();
-                    }
                 }
 
                 // Add tag that isn't any tag's child
@@ -171,12 +168,16 @@ namespace HTMLParser {
                 // remove last parent from parentsList
                 // add closing tag as DOMElement to tree
                 else if (element.Type == TagType.Closing) {
+                    int openingTagIndex = TagUtils.GetOpeningTagIndex(openingTagsList, element.TagName);                
+                    OpeningTag openingTag = openingTagIndex != -1 ? openingTagsList[openingTagIndex] : null;
+
                     if (element.TagName == lastParent.TagName) {
                         parentsList.Remove(lastParent);
                         parentsList[parentsList.Count - 1].Children.Add(element);
 
+                        openingTag.Count--;
                         openedTags--;
-                    } else {
+                    } else if (openingTag != null && openingTag.Count > 0) {
                         DOMElement closingTag = new DOMElement() {
                             Type = TagType.Closing,
                             TagCode = "/" + lastParent.TagName,
@@ -188,7 +189,7 @@ namespace HTMLParser {
                         parentsList[parentsList.Count - 1].Children.Add(closingTag);
 
                         i--;
-                    }
+                    }                    
                 }
                 // For every opening tag
                 // add it as last parent's child
@@ -199,8 +200,7 @@ namespace HTMLParser {
                     // Add new parent
                     parentsList.Add(element);
                     openedTags++;
-                }
-                else if (element.Type == TagType.SelfClosing) {
+                } else if (element.Type == TagType.SelfClosing) {
                     lastParent.Children.Add(element);
                 }
             }
