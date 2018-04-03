@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace HTMLParser {
     public static class HTML {
@@ -10,17 +10,23 @@ namespace HTMLParser {
             source = source.Trim();
             if (textInsideOneLine) source = source.Replace(System.Environment.NewLine, "");
 
-            DateTime timeBeforeParsing = DateTime.Now;
+            Stopwatch watch = Stopwatch.StartNew();
 
             // Parse source code to tags list
             List<DOMElement> tagsList = GetTagsList(source);
+
             // Get time
-            stats.SourceCodeParsingTime = Utils.GetTotalMiliseconds(timeBeforeParsing);
-            timeBeforeParsing = DateTime.Now;
+            watch.Stop();
+            stats.SourceCodeParsingTime = (int)watch.ElapsedMilliseconds;
+            watch.Reset();
+            watch.Start();
 
             // Parse tags list to DOM tree
             List<DOMElement> tree = GetDOMTree(tagsList);
-            stats.DOMTreeParsingTime = Utils.GetTotalMiliseconds(timeBeforeParsing);
+
+            // Get time
+            watch.Stop();
+            stats.DOMTreeParsingTime = (int)watch.ElapsedMilliseconds;
 
             return tree;
         }

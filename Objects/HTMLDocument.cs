@@ -1,15 +1,35 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace HTMLParser {
     public class HTMLDocument {
         public List<DOMElement> DOMTree = new List<DOMElement>();
-        public List<DOMElement> Meta;
+        public List<DOMElement> MetaTags = new List<DOMElement>();
 
         public Statistics Stats = new Statistics();
 
-        public HTMLDocument (string source) {
-            this.DOMTree = HTML.Parse(source, ref Stats);
-            this.Meta = GetElementsByName("meta");           
+        public bool IsDownloaded = false;
+
+        /// <param name="url">Source code or url</param>
+        public HTMLDocument (string url, bool isURL = true, bool textInsideOneLine = false) {
+            string source = isURL ? GetSourceCode(url) : url;
+
+            IsDownloaded = isURL;
+
+            this.DOMTree = HTML.Parse(source, ref Stats, textInsideOneLine);
+            this.MetaTags = GetElementsByName("meta");           
+        }
+
+        private string GetSourceCode(string url) {
+            Stopwatch watch = Stopwatch.StartNew();
+
+            string html = Utils.GetWebSiteContent(url);
+
+            // Get time
+            watch.Stop();
+            Stats.DownloadingTime = (int)watch.ElapsedMilliseconds;
+
+            return html;
         }
 
         public List<DOMElement> GetElementsByName (string name) {

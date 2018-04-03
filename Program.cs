@@ -3,16 +3,18 @@ using System.Text;
 
 namespace HTMLParser {
     class Program {
-        private static string HTMLPageContent = "";
         private static HTMLDocument Document;
+        private static string MainHTMLContent;
 
         private static void Main(string[] args) {
             Console.OutputEncoding = Encoding.UTF8;
 
-            // Get a source code
-            HTMLPageContent = FileManager.ReadFile(Paths.MainHTMLDocument);
+            MainHTMLContent = FileManager.ReadFile(Paths.MainHTMLDocument);
+
             // Get a DOM tree
-            Document = new HTMLDocument(HTMLPageContent);
+            // To parse a website instead of html file in assets folder use
+            // new HTMLDocument("url")
+            Document = new HTMLDocument(MainHTMLContent, false);
 
             // Write the DOM tree and the statistics
             DOMPrinter.WriteDOMTree(Document.DOMTree);
@@ -26,6 +28,11 @@ namespace HTMLParser {
                 Document.Stats.SourceCodeParsingTime + "ms");
             Utils.Log("Time of parsing to a DOM tree",
                 Document.Stats.DOMTreeParsingTime + "ms");
+
+            if (Document.IsDownloaded) {
+                Utils.Log("Downloading time",
+                    Document.Stats.DownloadingTime + "ms");
+            }
         }
     }
 }
