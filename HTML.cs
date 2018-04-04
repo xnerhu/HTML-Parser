@@ -62,7 +62,29 @@ namespace HTMLParser {
                         TagEndIndex = tagEndIndex
                     };
 
-                    if (element.TagName != "!doctype") {
+                    string lowerCaseTagName = element.TagName.ToLower();
+
+                    if (element.TagName.StartsWith("!") && lowerCaseTagName != "!doctype" && lowerCaseTagName != "?xml") {
+                        element.Type = TagType.Comment;
+
+                        int startIndex = element.TagStartIndex + 2;
+                        int endIndex = -1;
+
+                        int hyphensCount = GetHyphensCount(source, startIndex);
+
+                        endIndex = hyphensCount >= 2
+                            ? Utils.SearchForClosestString(source, "-->", i)
+                            : Utils.SearchForClosestChar(source, '>', i);
+
+                        if (endIndex == -1) endIndex = source.Length;
+                        
+                        element.Content = source.Substring(startIndex + hyphensCount, endIndex - startIndex - hyphensCount).Trim();
+                        element.Content = "<!-- " + element.Content + " -->";
+
+                        i += endIndex - startIndex;
+                    }
+
+                    if (lowerCaseTagName != "!doctype" && lowerCaseTagName != "?xml") {
                         if (element.Type == TagType.Opening) {
                             for (int l = 0; l < HTMLSelfClosingTags.list.Count; l++) {
                                 if (element.TagName == HTMLSelfClosingTags.list[l]) {
@@ -115,7 +137,7 @@ namespace HTMLParser {
                         }
 
                         // Add it to the list
-                        if (addNewElements) tags.Add(element);
+                        if (addNewElements || element.Type == TagType.Comment) tags.Add(element);
                     }                    
                 }
             }
@@ -200,30 +222,12 @@ namespace HTMLParser {
                     // Add new parent
                     parentsList.Add(element);
                     openedTags++;
-                } else if (element.Type == TagType.SelfClosing) {
+                } else if (element.Type == TagType.SelfClosing || element.Type == TagType.Comment) {
                     lastParent.Children.Add(element);
                 }
             }
 
             return tree;
-        }
-
-        private static int GetIndexOfLastTag (string source, int startIndex, string tagName) {
-            List<int> indexes = new List<int>();
-
-            for (int i = startIndex; i < source.Length; i++) {   
-                if (source[i] == '<') {
-                    int index = Utils.SearchForClosestChar(source, '>', i);
-                    string code = TagUtils.GetCode(source, i, index);
-                    string name = TagUtils.GetName(code);                    
-
-                    if (name == tagName && code.StartsWith("/")) {
-                        indexes.Add(index);
-                    }
-                }
-            }
-
-            return indexes.Count > 0 ? indexes[indexes.Count - 1] : -1;
         }
 
         /// <summary>
@@ -310,6 +314,35 @@ namespace HTMLParser {
             }
 
             return attributesList;
+        }
+
+        private static int GetIndexOfLastTag(string source, int startIndex, string tagName) {
+            List<int> indexes = new List<int>();
+
+            for (int i = startIndex; i < source.Length; i++) {
+                if (source[i] == '<') {
+                    int index = Utils.SearchForClosestChar(source, '>', i);
+                    string code = TagUtils.GetCode(source, i, index);
+                    string name = TagUtils.GetName(code);
+
+                    if (name == tagName && code.StartsWith("/")) {
+                        indexes.Add(index);
+                    }
+                }
+            }
+
+            return indexes.Count > 0 ? indexes[indexes.Count - 1] : -1;
+        }
+
+        private static int GetHyphensCount(string str, int startIndex) {
+            int count = 0;
+
+            for (int i = startIndex; i < str.Length; i++) {
+                if (str[i] == '-') count++;
+                else break;
+            }
+
+            return count;
         }
     }
 }

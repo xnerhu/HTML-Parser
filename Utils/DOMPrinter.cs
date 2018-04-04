@@ -4,14 +4,20 @@ using System.Collections.Generic;
 namespace HTMLParser {
     public static class DOMPrinter {
         public static void WriteElements(List<DOMElement> elements) {
+            ConsoleColor defaultColor = Console.ForegroundColor;
+
             for (int i = 0; i < elements.Count; i++) {
                 DOMElement element = elements[i];
-
+                
+                Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("<" + element.TagCode + ">");
 
                 if (element.Children.Count > 0 && element.Children[0].Type == TagType.Text) {
+                    Console.ForegroundColor = ConsoleColor.White;
                     Console.WriteLine(element.Children[0].Content);
                 }
+
+                Console.ForegroundColor = defaultColor;
             }
         }
 
@@ -24,7 +30,7 @@ namespace HTMLParser {
 
                 Console.Write("\n" + GetWhiteSpaces(level));
 
-                if (element.Type != TagType.Text) {
+                if (element.Type != TagType.Text && element.Type != TagType.Comment) {
                     if (element.TagName == "script") tagColor = ConsoleColor.DarkYellow;
                     else if (element.TagName == "style") tagColor = ConsoleColor.DarkBlue;
 
@@ -55,6 +61,8 @@ namespace HTMLParser {
                         if (parent.TagName == "script") textColor = ConsoleColor.Yellow;
                         else if (parent.TagName == "style") textColor = ConsoleColor.Blue;
                     }
+
+                    if (element.Type == TagType.Comment) textColor = ConsoleColor.DarkGray;
 
                     Console.ForegroundColor = textColor;
                     Console.Write(element.Content);

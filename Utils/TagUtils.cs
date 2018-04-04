@@ -40,5 +40,27 @@ namespace HTMLParser {
 
             return -1;
         }
+
+        public static List<DOMElement> ParseDOMTreeToList(List<DOMElement> tree) {
+            List<DOMElement> list = new List<DOMElement>();
+
+            for (int i = 0; i < tree.Count; i++) {
+                DOMElement element = tree[i];
+
+                list.Add(element);
+
+                if (element.Children.Count > 0) {
+                    List<DOMElement> children = ParseDOMTreeToList(element.Children);
+
+                    for (int c = 0; c < children.Count; c++) {
+                        if (children[c].TagCode != null) {
+                            list.Add(children[c]);
+                        }
+                    }
+                }
+            }
+
+            return list;
+        }
     }
 }

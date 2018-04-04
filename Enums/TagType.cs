@@ -2,7 +2,6 @@
     Opening,
     Closing,
     SelfClosing,
-    CommentOpening,
-    CommentClosing,
+    Comment,
     Text
 };
