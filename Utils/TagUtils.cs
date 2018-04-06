@@ -62,5 +62,29 @@ namespace HTMLParser {
 
             return list;
         }
+
+        public static bool IsTagIgnored (string tagName) {
+            tagName = tagName.ToLower();
+
+            for (int it = 0; it < HTMLSpecialList.ignoredTags.Count; it++) {
+                if (tagName == HTMLSpecialList.ignoredTags[it]) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public static bool IsTagSelfClosing(DOMElement element) {
+            if (element.Type == TagType.Opening) {
+                for (int l = 0; l < HTMLSpecialList.selfClosingTags.Count; l++) {
+                    if (element.TagName == HTMLSpecialList.selfClosingTags[l]) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
     }
 }

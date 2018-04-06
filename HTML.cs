@@ -23,7 +23,7 @@ namespace HTMLParser {
             watch.Start();
 
             // Parse tags list to DOM tree
-            List<DOMElement> tree = GetDOMTree(tagsList);
+            List<DOMElement> tree = GetDOMTree(tagsList, source);
 
             // Get time
             watch.Stop();
@@ -38,107 +38,82 @@ namespace HTMLParser {
         public static List<DOMElement> GetTagsList(string source) {
             List<DOMElement> tags = new List<DOMElement>();
 
-            bool addNewElements = true;
-            int startParsingIndex = -1;
+            bool ignoreNewElements = false;
 
             for (int i = 0; i < source.Length; i++) {
-                char character = source[i];
-
-                if (character == '<') {
-                    // Get tag's end index (>)
+                if (source[i] == '<') {
                     int tagEndIndex = Utils.SearchForClosestChar(source, '>', i + 1);
-                    // Get tag's code
                     string tagCode = TagUtils.GetCode(source, i, tagEndIndex);
-                    // Get tag's name
-                    string tagName = TagUtils.GetName(tagCode);
-                    // Get tag's type
-                    TagType tagType = TagUtils.GetType(tagCode);
-                    // Create DOMElement
+                    
+                    // Create new element
                     DOMElement element = new DOMElement() {
                         TagCode = tagCode,
-                        TagName = tagName,
-                        Type = tagType,
+                        TagName = TagUtils.GetName(tagCode),
+                        Type = TagUtils.GetType(tagCode),
                         TagStartIndex = i,
                         TagEndIndex = tagEndIndex
                     };
 
-                    string lowerCaseTagName = element.TagName.ToLower();
+                    // Check if the tag is on tags ignored list.
+                    // For example <!DOCTYPE html>
+                    bool isIgnored = TagUtils.IsTagIgnored(element.TagName);
 
-                    if (element.TagName.StartsWith("!") && lowerCaseTagName != "!doctype" && lowerCaseTagName != "?xml") {
-                        element.Type = TagType.Comment;
+                    if (!isIgnored) {
+                        // If the tag is a comment
+                        if (element.TagName.StartsWith("!")) {
+                            element.Type = TagType.Comment;
 
-                        int startIndex = element.TagStartIndex + 2;
-                        int endIndex = -1;
+                            int startIndex = element.TagStartIndex + 2;
+                            int endIndex = -1;
+                            int hyphensCount = GetHyphensCount(source, startIndex);
 
-                        int hyphensCount = GetHyphensCount(source, startIndex);
+                            endIndex = hyphensCount >= 2
+                                ? Utils.SearchForClosestString(source, "-->", i)
+                                : Utils.SearchForClosestChar(source, '>', i);
 
-                        endIndex = hyphensCount >= 2
-                            ? Utils.SearchForClosestString(source, "-->", i)
-                            : Utils.SearchForClosestChar(source, '>', i);
+                            if (endIndex == -1) endIndex = source.Length;
 
-                        if (endIndex == -1) endIndex = source.Length;
-                        
-                        element.Content = source.Substring(startIndex + hyphensCount, endIndex - startIndex - hyphensCount).Trim();
-                        element.Content = "<!-- " + element.Content + " -->";
+                            element.Content = source.Substring(startIndex + hyphensCount, endIndex - startIndex - hyphensCount).Trim();
+                            element.Content = "<!-- " + element.Content + " -->";
 
-                        i += endIndex - startIndex;
-                    }
-
-                    if (lowerCaseTagName != "!doctype" && lowerCaseTagName != "?xml") {
-                        if (element.Type == TagType.Opening) {
-                            for (int l = 0; l < HTMLSelfClosingTags.list.Count; l++) {
-                                if (element.TagName == HTMLSelfClosingTags.list[l]) {
-                                    element.Type = TagType.SelfClosing;
-                                    break;
-                                }
+                            i += endIndex - startIndex;
+                        }
+                        else {
+                            // If the tag is opening or self-closing, then get attributes
+                            if (element.Type == TagType.Opening) {
+                                element.Attributes = GetAttributes(element);
                             }
-                        }
-
-                        if (element.Type == TagType.Opening || element.Type == TagType.SelfClosing) {
-                            element.Attributes = GetAttributes(element);
-                        }
-
-                        // Tags that are disabling parsing for until they are closed
-                        if (element.TagName == "script" || element.TagName == "style") {
-                            if (element.Type == TagType.Opening && addNewElements) {
-                                addNewElements = false;
-                                tags.Add(element);
-
-                                startParsingIndex = GetIndexOfLastTag(source, element.TagEndIndex + 1, element.TagName);
-                            } else if (element.TagEndIndex == startParsingIndex && !addNewElements) {
-                                addNewElements = true;
-                                startParsingIndex = -1;
+                            
+                            if (TagUtils.IsTagSelfClosing(element)) {
+                                element.Type = TagType.SelfClosing;
                             }
-                        }
 
-                        // Get text between tags
-                        if (tags.Count > 0 && addNewElements) {
-                            DOMElement last = tags[tags.Count - 1];
+                            // Get a text between two tags 
+                            if (tags.Count > 0 && !ignoreNewElements) {
+                                DOMElement last = tags[tags.Count - 1];
 
-                            int startIndex = last.TagEndIndex + 1;
-                            int endIndex = element.TagStartIndex - last.TagEndIndex - 1;
+                                int startIndex = last.TagEndIndex + 1;
+                                int endIndex = element.TagStartIndex - last.TagEndIndex - 1;
 
-                            if (endIndex > 0) {
-                                string content = source.Substring(startIndex, endIndex).Trim();
+                                if (last.Type == TagType.SelfClosing) last = tags[tags.Count - 2];
 
-                                if (content.Length > 0) {
-                                    DOMElement text = new DOMElement() {
-                                        Type = TagType.Text,
-                                        Content = content
-                                    };
+                                if (endIndex > 0) {
+                                    string content = source.Substring(startIndex, endIndex).Trim();
 
-                                    if (last.Type == TagType.SelfClosing) {
-                                        last = tags[tags.Count - 2];
+                                    if (content.Length > 0) {
+                                        DOMElement text = new DOMElement() {
+                                            Type = TagType.Text,
+                                            Content = content
+                                        };
+
+                                        tags.Add(text);
                                     }
-
-                                    last.Children.Add(text);
                                 }
                             }
                         }
 
-                        // Add it to the list
-                        if (addNewElements || element.Type == TagType.Comment) tags.Add(element);
-                    }                    
+                        if (!ignoreNewElements) tags.Add(element);
+                    }
                 }
             }
 
@@ -148,7 +123,7 @@ namespace HTMLParser {
         /// <summary>
         /// Creates DOM tree from tags list
         /// </summary>
-        public static List<DOMElement> GetDOMTree(List<DOMElement> tagsList) {
+        public static List<DOMElement> GetDOMTree(List<DOMElement> tagsList, string source) {
             List<DOMElement> tree = new List<DOMElement>();
             List<DOMElement> parentsList = new List<DOMElement>();
             List<OpeningTag> openingTagsList = new List<OpeningTag>();
@@ -222,7 +197,7 @@ namespace HTMLParser {
                     // Add new parent
                     parentsList.Add(element);
                     openedTags++;
-                } else if (element.Type == TagType.SelfClosing || element.Type == TagType.Comment) {
+                } else {
                     lastParent.Children.Add(element);
                 }
             }

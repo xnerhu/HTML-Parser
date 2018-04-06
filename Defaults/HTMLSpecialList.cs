@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 
 namespace HTMLParser {
-    public static class HTMLSelfClosingTags {
-        public static List<string> list = new List<string>() {
+    public static class HTMLSpecialList {
+        public static List<string> selfClosingTags = new List<string>() {
             "area",
             "img",
             "base",
@@ -16,6 +16,11 @@ namespace HTMLParser {
             "source",
             "track",
             "link"
+        };
+
+        public static List<string> ignoredTags = new List<string>() {
+            "?xml",
+            "!doctype"
         };
     }
 }
