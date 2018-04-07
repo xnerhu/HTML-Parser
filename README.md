@@ -1,19 +1,19 @@
-# 🗃 HTML-Parser
+# :page_facing_up: HTML-Parser
 
 A HTML Parser prototype used in [`Layout-Engine`](https://github.com/nersent/layout-engine). The parser can parse incorrect HTML syntax but sometimes it could crash.
 
-## Testing
+## :zap: Testing
 
 To test it out, create a file named `index.html` in `HTML-Parser/bin/Debug/Assets` folder.
 
-## Features
+## :sparkles: Features
 
 * Parsing document from a website or a source code
 * Attributes parser
 * Auto closing tags
 * Ignoring not opened tags
 
-## Examples
+## :memo: Examples
 
 * Normal HTML with correct syntax
 
@@ -69,7 +69,7 @@ To test it out, create a file named `index.html` in `HTML-Parser/bin/Debug/Asset
   </html>
 ```
 
-## How it works
+## :building_construction: How it works
 
 ### 1. It parses source code (string) into different tags. `GetTagsList`
 
