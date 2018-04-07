@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 namespace HTMLParser {
     public class HTMLDocument {
@@ -11,13 +10,15 @@ namespace HTMLParser {
         public bool IsDownloaded = false;
 
         /// <param name="url">Source code or url</param>
-        public HTMLDocument (string url, bool isURL = true, bool textInsideOneLine = false) {
+        public HTMLDocument (string url, bool isURL = false, bool textInsideOneLine = false) {
+            if (!isURL && (url.StartsWith("http") || url.StartsWith("www."))) isURL = true; 
+
             string source = isURL ? GetSourceCode(url) : url;
 
             IsDownloaded = isURL;
 
             this.DOMTree = HTML.Parse(source, ref Stats, textInsideOneLine);
-            this.MetaTags = GetElementsByName("meta");           
+            this.MetaTags = GetElementsByName("meta");
         }
 
         private string GetSourceCode(string url) {

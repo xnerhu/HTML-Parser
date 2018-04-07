@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace HTMLParser {
     public static class DOMPrinter {
@@ -7,18 +6,23 @@ namespace HTMLParser {
             ConsoleColor defaultColor = Console.ForegroundColor;
 
             for (int i = 0; i < elements.Count; i++) {
-                DOMElement element = elements[i];
-                
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("<" + element.TagCode + ">");
+                DOMElement element = elements[i];               
 
-                if (element.Children.Count > 0 && element.Children[0].Type == TagType.Text) {
-                    Console.ForegroundColor = ConsoleColor.White;
-                    Console.WriteLine(element.Children[0].Content);
+                if (element.Type == TagType.Text || element.Type == TagType.Comment) {
+                    Console.ForegroundColor = element.Type == TagType.Text ? ConsoleColor.White : ConsoleColor.DarkGray;
+                    Console.WriteLine(element.Content);
+                } else {
+                    if (element.Type == TagType.Opening || element.Type == TagType.SelfClosing) {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                    } else if (element.Type == TagType.Closing) {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                    }
+
+                    Console.WriteLine("<" + element.TagCode + ">");
                 }
-
-                Console.ForegroundColor = defaultColor;
             }
+
+            Console.ForegroundColor = defaultColor;
         }
 
         public static void WriteDOMTree(CList<DOMElement> elements, int level = 0, DOMElement parent = null) {

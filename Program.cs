@@ -14,7 +14,7 @@ namespace HTMLParser {
             // Get a DOM tree
             // To parse a website instead of html file in assets folder use
             // new HTMLDocument("url")
-            Document = new HTMLDocument(MainHTMLContent, false);
+            Document = new HTMLDocument(MainHTMLContent);
 
             // Write the DOM tree and the statistics
             DOMPrinter.WriteDOMTree(Document.DOMTree);

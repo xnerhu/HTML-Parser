@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace HTMLParser {
+﻿namespace HTMLParser {
     public class DOMElement {
         public TagType Type;
         public string TagName;

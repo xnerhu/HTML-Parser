@@ -44,7 +44,7 @@ namespace HTMLParser {
                 if (source[i] == '<') {
                     int tagEndIndex = Utils.SearchForClosestChar(source, '>', i + 1);
                     string tagCode = TagUtils.GetCode(source, i, tagEndIndex);
-                    
+
                     // Create new element
                     DOMElement element = new DOMElement() {
                         TagCode = tagCode,
@@ -53,6 +53,10 @@ namespace HTMLParser {
                         TagStartIndex = i,
                         TagEndIndex = tagEndIndex
                     };
+
+                    if (element.Type == TagType.SelfClosing) {
+                        element.TagCode = element.TagCode.Substring(0, element.TagCode.Length - 1).Trim();
+                    }
 
                     // Check if the tag is on tags ignored list.
                     // For example <!DOCTYPE html>
@@ -80,7 +84,7 @@ namespace HTMLParser {
                         }
                         else {
                             // If the tag is opening or self-closing, then get attributes
-                            if (element.Type == TagType.Opening) {
+                            if (element.Type == TagType.Opening || element.Type == TagType.SelfClosing) {
                                 element.Attributes = GetAttributes(element);
                             }
                             
@@ -166,12 +170,12 @@ namespace HTMLParser {
                 // remove last parent from parentsList
                 // add closing tag as DOMElement to tree
                 else if (element.Type == TagType.Closing) {
-                    int parentOpeningTagIndex = TagUtils.GetOpeningTagIndex(openingTagsList, lastParent.TagName);
-                    OpeningTag parentOpeningTag = openingTagsList[parentOpeningTagIndex];
+                     int parentOpeningTagIndex = TagUtils.GetOpeningTagIndex(openingTagsList, lastParent.TagName);
+                     OpeningTag parentOpeningTag = openingTagsList[parentOpeningTagIndex];
 
                     if (element.TagName == lastParent.TagName) {
                         parentsList.Remove(lastParent);
-                        parentsList[parentsList.Count - 1].Children.Add(element);
+                        parentsList.GetLast().Children.Add(element);
                     } else if (openingTag.Count >= 0) {
                         DOMElement closingTag = new DOMElement() {
                             Type = TagType.Closing,
@@ -181,8 +185,9 @@ namespace HTMLParser {
                         };
 
                         parentsList.Remove(lastParent);
-                        parentsList[parentsList.Count - 1].Children.Add(closingTag);
+                        parentsList.GetLast().Children.Add(closingTag);
 
+                        openingTag.Count--;
                         parentOpeningTag.Count--;
                         i--;
                     }
