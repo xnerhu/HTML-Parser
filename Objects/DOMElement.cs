@@ -11,7 +11,7 @@ namespace HTMLParser {
         public int TagEndIndex = -1;
         public string HelperText;
 
-        public List<DOMElement> Children = new List<DOMElement>();
-        public List<DOMElementAttribute> Attributes = new List<DOMElementAttribute>();
+        public CList<DOMElement> Children = new CList<DOMElement>();
+        public CList<DOMElementAttribute> Attributes = new CList<DOMElementAttribute>();
     }
 }

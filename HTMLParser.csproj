@@ -45,6 +45,7 @@
     <Compile Include="Defaults\HTMLSpecialList.cs" />
     <Compile Include="Defaults\Paths.cs" />
     <Compile Include="Enums\TagType.cs" />
+    <Compile Include="Objects\CList.cs" />
     <Compile Include="Objects\HTMLDocument.cs" />
     <Compile Include="HTML.cs" />
     <Compile Include="Objects\DOMElementAttribute.cs" />

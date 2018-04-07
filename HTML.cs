@@ -7,14 +7,14 @@ namespace HTMLParser {
         /// <summary>
         /// Parses source code
         /// </summary>
-        public static List<DOMElement> Parse(string source, ref Statistics stats, bool textInsideOneLine = false) {
+        public static CList<DOMElement> Parse(string source, ref Statistics stats, bool textInsideOneLine = false) {
             source = source.Trim();
             if (textInsideOneLine) source = source.Replace(System.Environment.NewLine, "");
 
             Stopwatch watch = Stopwatch.StartNew();
 
             // Parse source code to tags list
-            List<DOMElement> tagsList = GetTagsList(source);
+            CList<DOMElement> tagsList = GetTagsList(source);
 
             // Get time
             watch.Stop();
@@ -23,7 +23,7 @@ namespace HTMLParser {
             watch.Start();
 
             // Parse tags list to DOM tree
-            List<DOMElement> tree = GetDOMTree(tagsList, source);
+            CList<DOMElement> tree = GetDOMTree(tagsList, source);
 
             // Get time
             watch.Stop();
@@ -35,8 +35,8 @@ namespace HTMLParser {
         /// <summary>
         /// Parses source code to objects
         /// </summary>
-        public static List<DOMElement> GetTagsList(string source) {
-            List<DOMElement> tags = new List<DOMElement>();
+        public static CList<DOMElement> GetTagsList(string source) {
+            CList<DOMElement> tags = new CList<DOMElement>();
 
             bool ignoreNewElements = false;
 
@@ -90,9 +90,9 @@ namespace HTMLParser {
 
                             // Get a text between two tags 
                             if (tags.Count > 0 && !ignoreNewElements) {
-                                DOMElement last = tags[tags.Count - 1];
+                                DOMElement last = tags.GetLast();
 
-                                int startIndex = last.TagEndIndex + 1;
+                                int startIndex = tags.GetLast().TagEndIndex + 1;
                                 int endIndex = element.TagStartIndex - last.TagEndIndex - 1;
 
                                 if (last.Type == TagType.SelfClosing) last = tags[tags.Count - 2];
@@ -123,38 +123,39 @@ namespace HTMLParser {
         /// <summary>
         /// Creates DOM tree from tags list
         /// </summary>
-        public static List<DOMElement> GetDOMTree(List<DOMElement> tagsList, string source) {
-            List<DOMElement> tree = new List<DOMElement>();
-            List<DOMElement> parentsList = new List<DOMElement>();
-            List<OpeningTag> openingTagsList = new List<OpeningTag>();
-
-            int openedTags = 0;
+        public static CList<DOMElement> GetDOMTree(CList<DOMElement> tagsList, string source) {
+            CList<DOMElement> tree = new CList<DOMElement>();
+            CList<DOMElement> parentsList = new CList<DOMElement>();
+            CList<OpeningTag> openingTagsList = new CList<OpeningTag>();
 
             for (int i = 0; i < tagsList.Count; i++) {
                 DOMElement element = tagsList[i];
+                DOMElement lastParent = parentsList.GetLast();
+                OpeningTag openingTag = null;
 
-                DOMElement lastParent = parentsList.Count > 0 ? parentsList[parentsList.Count - 1] : null;
-                OpeningTag lastOpeningTag = openingTagsList.Count > 0 ? openingTagsList[openingTagsList.Count - 1] : null;
+                if (element.Type == TagType.Closing || element.Type == TagType.Opening) {
+                    int index = TagUtils.GetOpeningTagIndex(openingTagsList, element.TagName);
 
-                if (element.Type == TagType.Opening) {
-                    int openingTagIndex = TagUtils.GetOpeningTagIndex(openingTagsList, element.TagName);
-
-                    if (openingTagIndex == -1) {
-                        OpeningTag openingTag = new OpeningTag() {
-                            Count = 1,
+                    if (index == -1) {
+                        openingTagsList.Add(new OpeningTag() {
+                            Count = 0,
                             TagName = element.TagName
-                        };
+                        });
 
-                        openingTagsList.Add(openingTag);
+                        openingTag = openingTagsList.GetLast();
                     } else {
-                        lastOpeningTag.Count++;
+                        openingTag = openingTagsList[index];
                     }
+
+                    if (element.Type == TagType.Opening) openingTag.Count++;
+                    else openingTag.Count--;
                 }
 
                 // Add tag that isn't any tag's child
                 // For example <html> is first tag in a document so it isn't any tag's child
                 if (parentsList.Count == 0 || (element.Type == TagType.Closing && parentsList.Count == 1)) {
                     tree.Add(element);
+
                     // Add tag as a parent
                     // For example <html>
                     if (element.Type == TagType.Opening) {
@@ -165,16 +166,13 @@ namespace HTMLParser {
                 // remove last parent from parentsList
                 // add closing tag as DOMElement to tree
                 else if (element.Type == TagType.Closing) {
-                    int openingTagIndex = TagUtils.GetOpeningTagIndex(openingTagsList, element.TagName);                
-                    OpeningTag openingTag = openingTagIndex != -1 ? openingTagsList[openingTagIndex] : null;
+                    int parentOpeningTagIndex = TagUtils.GetOpeningTagIndex(openingTagsList, lastParent.TagName);
+                    OpeningTag parentOpeningTag = openingTagsList[parentOpeningTagIndex];
 
                     if (element.TagName == lastParent.TagName) {
                         parentsList.Remove(lastParent);
                         parentsList[parentsList.Count - 1].Children.Add(element);
-
-                        openingTag.Count--;
-                        openedTags--;
-                    } else if (openingTag != null && openingTag.Count > 0) {
+                    } else if (openingTag.Count >= 0) {
                         DOMElement closingTag = new DOMElement() {
                             Type = TagType.Closing,
                             TagCode = "/" + lastParent.TagName,
@@ -185,8 +183,9 @@ namespace HTMLParser {
                         parentsList.Remove(lastParent);
                         parentsList[parentsList.Count - 1].Children.Add(closingTag);
 
+                        parentOpeningTag.Count--;
                         i--;
-                    }                    
+                    }
                 }
                 // For every opening tag
                 // add it as last parent's child
@@ -196,7 +195,6 @@ namespace HTMLParser {
                     lastParent.Children.Add(element);
                     // Add new parent
                     parentsList.Add(element);
-                    openedTags++;
                 } else {
                     lastParent.Children.Add(element);
                 }
@@ -208,10 +206,10 @@ namespace HTMLParser {
         /// <summary>
         /// Parses tag's code to attributes
         /// </summary>
-        public static List<DOMElementAttribute> GetAttributes(DOMElement element) {
+        public static CList<DOMElementAttribute> GetAttributes(DOMElement element) {
             string tagCode = element.TagCode.Substring(element.TagName.Length, element.TagCode.Length - element.TagName.Length).Trim();
 
-            List<DOMElementAttribute> attributesList = new List<DOMElementAttribute>();
+            CList<DOMElementAttribute> attributesList = new CList<DOMElementAttribute>();
 
             if (tagCode.Length > 0) {
                 bool searchForAttribute = true;
@@ -221,13 +219,14 @@ namespace HTMLParser {
                 char quoteChar = '"';
 
                 for (int i = 0; i < tagCode.Length; i++) {
-                    DOMElementAttribute lastAttribute = attributesList.Count > 0 ? attributesList[attributesList.Count - 1] : null;
+                    DOMElementAttribute lastAttribute = attributesList.GetLast();
 
                     if (tagCode[i] != ' ') {
                         if (searchForAttribute) {
-                            DOMElementAttribute attribute = new DOMElementAttribute();
-                            // Set attribute's property start index as the loop index
-                            attribute.PropertyStartIndex = i;
+                            DOMElementAttribute attribute = new DOMElementAttribute {
+                                // Set attribute's property start index as the loop index
+                                PropertyStartIndex = i
+                            };
 
                             // Get closest equals char index for getting attribute property
                             int closestEqualsChar = Utils.SearchForClosestChar(tagCode, '=', i);
@@ -248,12 +247,8 @@ namespace HTMLParser {
                             attributesList.Add(attribute);
 
                             // If attribute has value, then its searching for value
-                            if (hasValue) {
-                                searchForValue = true;
-                            } else {
-                                // Skip the loop index
-                                i = attribute.PropertyEndIndex;
-                            }
+                            if (hasValue) searchForValue = true;
+                            else i = attribute.PropertyEndIndex;
 
                             // Search for another attribute
                             searchForAttribute = !hasValue;
@@ -289,24 +284,6 @@ namespace HTMLParser {
             }
 
             return attributesList;
-        }
-
-        private static int GetIndexOfLastTag(string source, int startIndex, string tagName) {
-            List<int> indexes = new List<int>();
-
-            for (int i = startIndex; i < source.Length; i++) {
-                if (source[i] == '<') {
-                    int index = Utils.SearchForClosestChar(source, '>', i);
-                    string code = TagUtils.GetCode(source, i, index);
-                    string name = TagUtils.GetName(code);
-
-                    if (name == tagName && code.StartsWith("/")) {
-                        indexes.Add(index);
-                    }
-                }
-            }
-
-            return indexes.Count > 0 ? indexes[indexes.Count - 1] : -1;
         }
 
         private static int GetHyphensCount(string str, int startIndex) {

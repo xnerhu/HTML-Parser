@@ -3,8 +3,8 @@ using System.Diagnostics;
 
 namespace HTMLParser {
     public class HTMLDocument {
-        public List<DOMElement> DOMTree = new List<DOMElement>();
-        public List<DOMElement> MetaTags = new List<DOMElement>();
+        public CList<DOMElement> DOMTree = new CList<DOMElement>();
+        public CList<DOMElement> MetaTags = new CList<DOMElement>();
 
         public Statistics Stats = new Statistics();
 
@@ -32,8 +32,8 @@ namespace HTMLParser {
             return html;
         }
 
-        public List<DOMElement> GetElementsByName (string name) {
-            List<DOMElement> list = new List<DOMElement>();
+        public CList<DOMElement> GetElementsByName (string name) {
+            CList<DOMElement> list = new CList<DOMElement>();
 
             for (int i = 0; i < this.DOMTree.Count; i++) {
                 DOMElement element = this.DOMTree[i];

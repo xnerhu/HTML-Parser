@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace HTMLParser {
     public static class DOMPrinter {
-        public static void WriteElements(List<DOMElement> elements) {
+        public static void WriteElements(CList<DOMElement> elements) {
             ConsoleColor defaultColor = Console.ForegroundColor;
 
             for (int i = 0; i < elements.Count; i++) {
@@ -21,7 +21,7 @@ namespace HTMLParser {
             }
         }
 
-        public static void WriteDOMTree(List<DOMElement> elements, int level = 0, DOMElement parent = null) {
+        public static void WriteDOMTree(CList<DOMElement> elements, int level = 0, DOMElement parent = null) {
             for (int i = 0; i < elements.Count; i++) {
                 DOMElement element = elements[i];
 
@@ -70,7 +70,7 @@ namespace HTMLParser {
             }
         }
 
-        public static void WriteAttributes(List<DOMElementAttribute> list,
+        public static void WriteAttributes(CList<DOMElementAttribute> list,
             bool writeInLine = false,
             bool firstItemSpace = false,
             ConsoleColor attrColor = ConsoleColor.Cyan,

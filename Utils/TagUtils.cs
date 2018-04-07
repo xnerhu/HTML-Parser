@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace HTMLParser {
+﻿namespace HTMLParser {
     public static class TagUtils {
         public static TagType GetType(string source) {
             if (source[0] == '/') return TagType.Closing;
@@ -33,7 +31,7 @@ namespace HTMLParser {
             return source.Substring(startIndex, endIndex - startIndex + 1).ToLower();
         }
 
-        public static int GetOpeningTagIndex(List<OpeningTag> collection, string tagName) {
+        public static int GetOpeningTagIndex(CList<OpeningTag> collection, string tagName) {
             for (int i = 0; i < collection.Count; i++) {
                 if (collection[i].TagName == tagName) return i;
             }
@@ -41,8 +39,8 @@ namespace HTMLParser {
             return -1;
         }
 
-        public static List<DOMElement> ParseDOMTreeToList(List<DOMElement> tree) {
-            List<DOMElement> list = new List<DOMElement>();
+        public static CList<DOMElement> ParseDOMTreeToList(CList<DOMElement> tree) {
+            CList<DOMElement> list = new CList<DOMElement>();
 
             for (int i = 0; i < tree.Count; i++) {
                 DOMElement element = tree[i];
@@ -50,7 +48,7 @@ namespace HTMLParser {
                 list.Add(element);
 
                 if (element.Children.Count > 0) {
-                    List<DOMElement> children = ParseDOMTreeToList(element.Children);
+                    CList<DOMElement> children = ParseDOMTreeToList(element.Children);
 
                     for (int c = 0; c < children.Count; c++) {
                         if (children[c].TagCode != null) {
