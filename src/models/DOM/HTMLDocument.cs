@@ -10,14 +10,14 @@ namespace HTMLParser {
         public bool IsDownloaded = false;
 
         /// <param name="url">Source code or url</param>
-        public HTMLDocument (string url, bool isURL = false, bool textInsideOneLine = false) {
+        public HTMLDocument (string url, bool isURL = false) {
             if (!isURL && (url.StartsWith("http") || url.StartsWith("www."))) isURL = true; 
 
             string source = isURL ? GetSourceCode(url) : url;
 
             IsDownloaded = isURL;
 
-            this.DOMTree = HTML.Parse(source, ref Stats, textInsideOneLine);
+            this.DOMTree = HTML.Parse(source, ref Stats);
             this.MetaTags = GetElementsByName("meta");
         }
 

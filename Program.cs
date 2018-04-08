@@ -12,7 +12,7 @@ namespace HTMLParser {
             MainHTMLContent = FileManager.ReadFile(Paths.MainHTMLDocument);
 
             // Get a DOM tree
-            // To parse a website instead of html file in assets folder use
+            // To parse a website instead of a HTML file in assets folder use
             // new HTMLDocument("url")
             Document = new HTMLDocument(MainHTMLContent);
 

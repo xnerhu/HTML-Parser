@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net;
 
@@ -50,21 +49,22 @@ namespace HTMLParser {
         public static string GetWebSiteContent(string url) {
             url = GetValidURL(url);
 
-            string content = "";
+             string content = "";
 
-            try {
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+             try {
+                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+                request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36";
 
-                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-                using (Stream stream = response.GetResponseStream())
-                using (StreamReader reader = new StreamReader(stream)) {
-                    content = reader.ReadToEnd();
-                }
-            } catch (WebException exception) {
-                Console.WriteLine(exception.Message);
-            }
+                 using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                 using (Stream stream = response.GetResponseStream())
+                 using (StreamReader reader = new StreamReader(stream)) {
+                     content = reader.ReadToEnd();
+                 }
+             } catch (WebException exception) {
+                 Console.WriteLine(exception.Message);
+             }
 
-            return content;
+             return content;
         }
     }
 }
