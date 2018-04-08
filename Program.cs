@@ -17,10 +17,10 @@ namespace HTMLParser {
             Document = new HTMLDocument(Content);
 
             DOMElement testElement = Document.GetElementById("test");
-            testElement.SetInnerHTML("<form><input type='text' placeHolder='Login'><button id='submit'>A button</button></form>");
+            testElement.InnerHTML = "<form><input type='text' placeHolder='Login'><button id='submit'>A button</button></form>";
 
             DOMElement submitButtonElement = Document.GetElementById("submit");
-            submitButtonElement.SetInnerHTML("<span>Submit</span>");
+            submitButtonElement.InnerHTML = "<span>Submit</span>";
             
             // Write the DOM tree and the statistics
             DOMPrinter.WriteDOMTree(Document.DOMTree);

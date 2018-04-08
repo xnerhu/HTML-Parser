@@ -13,15 +13,15 @@ namespace HTMLParser {
         public HTMLDocument(string url, bool isURL = false) {
             if (!isURL && (url.StartsWith("http") || url.StartsWith("www."))) isURL = true;
             Source = isURL ? GetSourceCode(url) : url;
-
             IsDownloaded = isURL;
 
-            // Parse
-            DOMTree = HTML.Parse(Source, ref Stats);
-
-            // Get meta tags
-            MetaTags = GetElementsByName("meta");
+            Parse();
         }
+
+        private void Parse() {
+            DOMTree = HTML.Parse(Source, ref Stats);
+            MetaTags = GetElementsByName("meta");
+        } 
 
         #region Utils
 
@@ -72,5 +72,12 @@ namespace HTMLParser {
         }
 
         #endregion
+
+        public void Write(string source) {
+            IsDownloaded = false;
+            this.Source = source;
+
+            Parse();
+        }
     }
 }

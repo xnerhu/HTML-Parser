@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace HTMLParser {
+﻿namespace HTMLParser {
     public class DOMElement {
         public TagType Type;
         public string TagName;
@@ -13,6 +11,15 @@ namespace HTMLParser {
 
         public CList<DOMElement> Children = new CList<DOMElement>();
         public CList<DOMElementAttribute> Attributes = new CList<DOMElementAttribute>();
+
+        public string InnerHTML {
+            get {
+                return TagUtils.MinifyHTML(Children);
+            }
+            set {
+                Children = DOMTree.Get(HTML.GetTagsList(value), value);
+            }
+        }
 
         #region Attributes
 
@@ -44,20 +51,6 @@ namespace HTMLParser {
         public string GetAttribute(string property) {
             int index = GetAttributeIndex(property);
             return index != -1 ? Attributes[index].Value : null;
-        }
-
-        #endregion
-
-        #region InnerHTML
-        
-        public string GetInnerHTML () {
-            return TagUtils.MinifyHTML(Children);
-        }
-
-        public string SetInnerHTML(string innerHTML) {
-            Children = DOMTree.Get(HTML.GetTagsList(innerHTML), innerHTML);
-
-            return innerHTML;
         }
 
         #endregion
