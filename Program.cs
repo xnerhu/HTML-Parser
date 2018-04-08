@@ -4,18 +4,24 @@ using System.Text;
 namespace HTMLParser {
     class Program {
         private static HTMLDocument Document;
-        private static string MainHTMLContent;
+        private static string Content;
 
         private static void Main(string[] args) {
             Console.OutputEncoding = Encoding.UTF8;
 
-            MainHTMLContent = FileManager.ReadFile(Paths.MainHTMLDocument);
+            Content = FileManager.ReadFile(Paths.MainHTMLDocument);
 
             // Get a DOM tree
             // To parse a website instead of a HTML file in assets folder use
             // new HTMLDocument("url")
-            Document = new HTMLDocument(MainHTMLContent);
+            Document = new HTMLDocument(Content);
 
+            DOMElement testElement = Document.GetElementById("test");
+            testElement.SetInnerHTML("<form><input type='text' placeHolder='Login'><button id='submit'>A button</button></form>");
+
+            DOMElement submitButtonElement = Document.GetElementById("submit");
+            submitButtonElement.SetInnerHTML("<span>Submit</span>");
+            
             // Write the DOM tree and the statistics
             DOMPrinter.WriteDOMTree(Document.DOMTree);
             WriteStatistics();

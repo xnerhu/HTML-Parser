@@ -1,5 +1,7 @@
 ﻿namespace HTMLParser {
     public static class TagUtils {
+        #region Parsing
+
         public static TagType GetType(string source) {
             if (source[0] == '/') return TagType.Closing;
             else if (source[source.Length - 1] == '/') return TagType.SelfClosing;
@@ -104,5 +106,51 @@
 
             return tagStartIndex == -1 ? source.Length : tagStartIndex;
         }
+
+        #endregion
+
+        #region Minifing
+
+        public static string MinifyHTML(CList<DOMElement> elements) {
+            string html = "";
+
+            for (int i = 0; i < elements.Count; i++) {
+                DOMElement element = elements[i];
+
+                if (element.Type != TagType.Text && element.Type != TagType.Comment) {
+                    string attrs = element.Attributes.Count > 0 ? (" " + MinifyAttributes(element.Attributes)) : "";
+
+                    html += "<" + (element.Type == TagType.Closing ? "/" : "") + element.TagName + attrs + ">";
+
+                    if (element.Children.Count > 0) {
+                        html += MinifyHTML(element.Children);
+                    }
+                } else {
+                    html += element.Content;
+                }                               
+            }
+
+            return html;
+        }
+
+        private static string MinifyAttributes(CList<DOMElementAttribute> attributes) {
+            if (attributes.Count > 0) {
+                string content = "";
+
+                for (int i = 0; i < attributes.Count; i++) {
+                    DOMElementAttribute attribute = attributes[i];
+                    if (i != 0) content += ' ';
+
+                    content += attribute.Property;
+                    if (attribute.Value != null) content += "=\"" + attribute.Value + "\"";
+                }
+
+                return content;
+            }
+
+            return "";
+        }
+
+        #endregion
     }
 }

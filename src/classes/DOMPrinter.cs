@@ -91,7 +91,7 @@ namespace HTMLParser {
                 Console.Write(((i > 0 && writeInLine) || firstItemSpace ? " " : "") + attribute.Property);
 
                 // Write value
-                if (attribute.Value.Length != 0) {
+                if (attribute.Value != null) {
                     Console.Write('=');
                     Console.ForegroundColor = valueColor;
                     Console.Write('"' + attribute.Value + '"');

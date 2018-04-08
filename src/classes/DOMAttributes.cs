@@ -37,7 +37,7 @@
                             // Get attribute's property end index
                             attribute.PropertyEndIndex = spaceIndexInContent == -1 ? closestEqualsChar : (spaceIndexInContent + attribute.PropertyStartIndex);
                             // Get property by cutting
-                            attribute.Property = tagCode.Substring(attribute.PropertyStartIndex, attribute.PropertyEndIndex - attribute.PropertyStartIndex);
+                            attribute.Property = tagCode.Substring(attribute.PropertyStartIndex, attribute.PropertyEndIndex - attribute.PropertyStartIndex).ToLower();
                             // Add attribute to the list
                             attributesList.Add(attribute);
 

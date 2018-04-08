@@ -52,7 +52,7 @@
     <Compile Include="src\classes\HTML.cs" />
     <Compile Include="src\models\DOM\DOMElementAttribute.cs" />
     <Compile Include="src\models\DOM\DOMElement.cs" />
-    <Compile Include="src\models\helpers\OpeningTag.cs" />
+    <Compile Include="src\models\parsing\OpeningTag.cs" />
     <Compile Include="src\models\Statistics.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
