@@ -81,13 +81,12 @@ namespace HTMLParser {
                             element.Content = "<!-- " + element.Content + " -->";
 
                             i += endIndex - startIndex;
-                        }
-                        else {
+                        } else {
                             // If the tag is opening or self-closing, then get attributes
                             if (element.Type == TagType.Opening || element.Type == TagType.SelfClosing) {
                                 element.Attributes = GetAttributes(element);
                             }
-                            
+
                             if (TagUtils.IsTagSelfClosing(element)) {
                                 element.Type = TagType.SelfClosing;
                             }
@@ -114,9 +113,20 @@ namespace HTMLParser {
                                     }
                                 }
                             }
-                        }
 
-                        if (!ignoreNewElements) tags.Add(element);
+                            if (!ignoreNewElements) tags.Add(element);
+
+                            string lowerCaseTagName = element.TagName.ToLower();
+
+                            if (element.Type == TagType.Opening && (lowerCaseTagName == "script" || lowerCaseTagName == "style")) {
+                                string searchedTagName = lowerCaseTagName == "script" ? "script" : "style";
+                                int searchedTagIndex = TagUtils.GetClosestClosingTagIndex(source, element.TagEndIndex + 1, searchedTagName);
+
+                                element.Content = source.Substring(element.TagEndIndex + 1, searchedTagIndex - element.TagEndIndex - 1);
+
+                                i = element.TagEndIndex + element.Content.Length;
+                            }
+                        }
                     }
                 }
             }
@@ -170,8 +180,8 @@ namespace HTMLParser {
                 // remove last parent from parentsList
                 // add closing tag as DOMElement to tree
                 else if (element.Type == TagType.Closing) {
-                     int parentOpeningTagIndex = TagUtils.GetOpeningTagIndex(openingTagsList, lastParent.TagName);
-                     OpeningTag parentOpeningTag = openingTagsList[parentOpeningTagIndex];
+                    int parentOpeningTagIndex = TagUtils.GetOpeningTagIndex(openingTagsList, lastParent.TagName);
+                    OpeningTag parentOpeningTag = openingTagsList[parentOpeningTagIndex];
 
                     if (element.TagName == lastParent.TagName) {
                         parentsList.Remove(lastParent);

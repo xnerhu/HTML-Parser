@@ -84,5 +84,25 @@
 
             return false;
         }
+
+        public static int GetClosestClosingTagIndex(string source, int startIndex, string searchedTagName) {
+            int tagStartIndex = -1;
+
+            for (int i = startIndex; i < source.Length; i++) {
+                if (source[i] == '<') {
+                    int tagEndIndex = Utils.SearchForClosestChar(source, '>', i + 1);
+                    string tagCode = TagUtils.GetCode(source, i, tagEndIndex);
+                    string tagName = TagUtils.GetName(tagCode);
+                    TagType tagType = TagUtils.GetType(tagCode);
+
+                    if (tagType == TagType.Closing && tagName == searchedTagName) {
+                        tagStartIndex = i;
+                        break;
+                    }
+                }
+            }
+
+            return tagStartIndex == -1 ? source.Length : tagStartIndex;
+        }
     }
 }
