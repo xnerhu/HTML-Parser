@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace HTMLParser {
     public static class DOMBuilder {
@@ -30,8 +31,8 @@ namespace HTMLParser {
                         }
                     }
                 } else {
-                   node.nodeName = "#text";
-                   node.nodeValue = token;
+                    node.nodeName = "#text";
+                    node.nodeValue = token;
                 }
 
                 if (node.parentNode == null) {

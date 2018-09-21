@@ -11,11 +11,13 @@ namespace HTMLParser {
 
             for (int i = 0; i < source.Length; i++) {
                  if (source[i] == '<') {
+                    text = text.Trim();
+
                     if (text.Length > 0) {
                         list.Add(text);
-                        text = "";
                     }
 
+                    text = "";
                     capturingTag = true;
                 } else if (source[i] == '>' && capturingTag) {
                     list.Add(text + '>');

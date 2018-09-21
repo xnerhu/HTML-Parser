@@ -9,10 +9,10 @@ namespace HTMLParser {
         }
 
         private static void PrintChildren(List<Node> tree, bool printClosing, ref int lastLevel, int level = 0) {
-             foreach (Node node in tree) {
-                string gap = new string(' ', 2 * level);
+            lastLevel = level;
 
-                lastLevel = level;
+            foreach (Node node in tree) {
+                string gap = new string(' ', 2 * level);
 
                 if (node.nodeType == NodeType.TEXT_NODE) {
                     Console.WriteLine(gap + node.nodeValue);
@@ -28,6 +28,12 @@ namespace HTMLParser {
                     Console.WriteLine(string.Format("{0}</{1}>", gap, node.nodeName));
                 }
 
+            }
+        }
+
+        public static void PrintTokens(List<string> tokens) {
+            foreach (string token in tokens) {
+                Console.WriteLine(token);
             }
         }
     }
