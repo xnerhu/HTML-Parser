@@ -14,7 +14,7 @@ namespace HTMLParser {
             List<string> tokens = Tokenizer.Tokenize(sourceCode);
             List<Node> tree = DOMBuilder.Build(tokens);
 
-            Printer.PrintTree(tree);
+            Printer.Print(tree);
 
             Console.ReadLine();
         }

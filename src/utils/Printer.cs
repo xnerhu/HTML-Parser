@@ -3,18 +3,31 @@ using System.Collections.Generic;
 
 namespace HTMLParser {
     public static class Printer {
-        public static void PrintTree(List<Node> tree, int level = 0) {
-            foreach (Node node in tree) {
+        public static void Print(List<Node> tree, bool printClosing = true) {
+            int lastLevel = 0;
+            PrintChildren(tree, printClosing, ref lastLevel);
+        }
+
+        private static void PrintChildren(List<Node> tree, bool printClosing, ref int lastLevel, int level = 0) {
+             foreach (Node node in tree) {
                 string gap = new string(' ', 2 * level);
 
-                Console.Write('\n' + gap);
+                lastLevel = level;
 
-                if (node.nodeType == NodeType.ELEMENT_NODE) {
-                    Console.Write('<' + node.nodeName + '>');
-                    PrintTree(node.childNodes, level + 1);
-                } else {
-                    Console.Write(node.nodeValue);
+                if (node.nodeType == NodeType.TEXT_NODE) {
+                    Console.WriteLine(gap + node.nodeValue);
+                } else if (node.nodeType == NodeType.ELEMENT_NODE) {
+                    Console.WriteLine(string.Format("{0}<{1}>", gap, node.nodeName));
+
+                    if (node.childNodes.Count > 0) {
+                        PrintChildren(node.childNodes, printClosing, ref lastLevel, level + 1);
+                    }
                 }
+
+                if (printClosing && (level < lastLevel || level == 0)) {
+                    Console.WriteLine(string.Format("{0}</{1}>", gap, node.nodeName));
+                }
+
             }
         }
     }
