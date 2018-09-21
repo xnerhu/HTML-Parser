@@ -13,9 +13,37 @@ namespace HTMLParser {
 
             List<string> tokens = Tokenizer.Tokenize(sourceCode);
 
-            foreach (string token in tokens) {
-                Console.WriteLine(token);
-            }
+            List<Node> tree = new List<Node>() {
+                new Node() {
+                    nodeName = "html",
+                    nodeType = NodeType.ELEMENT_NODE,
+                    childNodes = new List<Node> () {
+                        new Node() {
+                            nodeName = "body",
+                            nodeType = NodeType.ELEMENT_NODE,
+                            childNodes = new List<Node> () {
+                                new Node() {
+                                    nodeName = "a",
+                                    nodeType = NodeType.ELEMENT_NODE,
+                                    childNodes = new List<Node> () {
+                                        new Node() {
+                                            nodeName = "#text",
+                                            nodeType = NodeType.TEXT_NODE,
+                                            nodeValue = "A text"
+                                        }
+                                    }
+                                },
+                                new Node() {
+                                    nodeName = "b",
+                                    nodeType = NodeType.ELEMENT_NODE,
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            Printer.PrintTree(tree);
 
             Console.ReadLine();
         }
