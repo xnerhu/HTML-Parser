@@ -18,7 +18,6 @@
 
   <ItemGroup>
     <Folder Include="assets\" />
-    <Folder Include="src\" />
   </ItemGroup>
 
   <ItemGroup>
