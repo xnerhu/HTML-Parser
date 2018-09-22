@@ -2,10 +2,10 @@
 
 namespace HTMLParser {
     public class Node {
-        public NodeType nodeType;
-        public string nodeName;
-        public string nodeValue;
-        public Node parentNode;
-        public List<Node> childNodes = new List<Node>();
+        public NodeType NodeType { get; set; }
+        public string NodeName { get; set; }
+        public string NodeValue { get; set; }
+        public Node ParentNode { get; set; }
+        public List<Node> ChildNodes { get; set; }
     }
 }

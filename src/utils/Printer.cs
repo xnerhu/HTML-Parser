@@ -14,20 +14,19 @@ namespace HTMLParser {
             foreach (Node node in tree) {
                 string gap = new string(' ', 2 * level);
 
-                if (node.nodeType == NodeType.TEXT_NODE) {
-                    Console.WriteLine(gap + node.nodeValue);
-                } else if (node.nodeType == NodeType.ELEMENT_NODE) {
-                    Console.WriteLine(string.Format("{0}<{1}>", gap, node.nodeName));
+                if (node.NodeType == NodeType.TEXT_NODE) {
+                    Console.WriteLine(gap + node.NodeValue);
+                } else if (node.NodeType == NodeType.ELEMENT_NODE) {
+                    Console.WriteLine(string.Format("{0}<{1}>", gap, node.NodeName));
 
-                    if (node.childNodes.Count > 0) {
-                        PrintChildren(node.childNodes, printClosing, ref lastLevel, level + 1);
+                    if (node.ChildNodes.Count > 0) {
+                        PrintChildren(node.ChildNodes, printClosing, ref lastLevel, level + 1);
                     }
                 }
 
-                if (printClosing && node.nodeType == NodeType.ELEMENT_NODE && (level < lastLevel || level == 0)) {
-                    Console.WriteLine(string.Format("{0}</{1}>", gap, node.nodeName));
+                if (printClosing && node.NodeType == NodeType.ELEMENT_NODE && (level < lastLevel || level == 0)) {
+                    Console.WriteLine(string.Format("{0}</{1}>", gap, node.NodeName));
                 }
-
             }
         }
 

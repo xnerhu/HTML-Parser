@@ -5,33 +5,32 @@ namespace HTMLParser {
     public static class DOMBuilder {
         public static List<Node> Build(List<string> tokens) {
             List<Node> tree = new List<Node>();
-            Node parentNode = null;
-
             List<string> openedTags = new List<string>();
+            Node parentNode = null;
 
             for (int i = 0; i < tokens.Count; i++) {
                 string token = tokens[i];
 
                 Node node = new Node() {
-                    nodeType = GetNodeType(token),
-                    parentNode = parentNode
+                    NodeType = NodeUtils.GetNodeType(token),
+                    ParentNode = parentNode
                 };
 
-                if (node.nodeType == NodeType.ELEMENT_NODE) {
-                    TagType tagType = GetTagType(token);
+                if (node.NodeType == NodeType.ELEMENT_NODE) {
+                    TagType tagType = TagUtils.GetTagType(token);
 
                     if (tagType == TagType.Closing) {
-                        string tokenTagName = GetTagName(token);
+                        string tokenTagName = TagUtils.GetTagName(token);
                         int index = openedTags.LastIndexOf(tokenTagName);
 
                         if (index != -1) {
-                            if (parentNode.nodeName == tokenTagName) {
-                                parentNode = parentNode.parentNode;
+                            if (parentNode.NodeName == tokenTagName) {
+                                parentNode = parentNode.ParentNode;
                             } else {
-                                Node parent = GetParentTag(tokenTagName, parentNode.parentNode);
+                                Node parent = TagUtils.GetParentTag(tokenTagName, parentNode.ParentNode);
 
-                                if (parent != null && parent.parentNode != null) {
-                                    parentNode = parent.parentNode;
+                                if (parent != null && parent.ParentNode != null) {
+                                    parentNode = parent.ParentNode;
                                 }
                             }
 
@@ -40,66 +39,25 @@ namespace HTMLParser {
 
                         continue;
                     } else {
-                        node.nodeName = GetTagName(token);
-                        parentNode = node;
+                        node.ChildNodes = new List<Node>();
+                        node.NodeName = TagUtils.GetTagName(token);
 
-                        openedTags.Add(node.nodeName);
+                        parentNode = node;
+                        openedTags.Add(node.NodeName);
                     }
                 } else {
-                    node.nodeName = "#text";
-                    node.nodeValue = token;
+                    node.NodeName = "#text";
+                    node.NodeValue = token;
                 }
 
-                if (node.parentNode == null) {
+                if (node.ParentNode == null) {
                     tree.Add(node);
                 } else {
-                    node.parentNode.childNodes.Add(node);
+                    node.ParentNode.ChildNodes.Add(node);
                 }
             }
 
             return tree;
-        }
-
-        private static Node GetParentTag(string tagName, Node node) {
-            if (node == null) return null;
-
-            if (node.nodeName == tagName) {
-                return node;
-            } else {
-                return GetParentTag(tagName, node.parentNode);
-            }
-        }
-
-        private static string GetTagName(string token) {
-            string tagName = "";
-
-            for (int i = 0; i < token.Length; i++) {
-                if (token[i] == '>' || token[i] == ' ') {
-                    return tagName;
-                } else if (token[i] != '<' && token[i] != '/') {
-                    tagName += token[i];
-                }
-            }
-
-            return null;
-        }
-
-        private static NodeType GetNodeType(string token) {
-            if (token.Length >= 3 && token.StartsWith('<') && token.EndsWith('>')) {
-                return NodeType.ELEMENT_NODE;
-            }
-
-            return NodeType.TEXT_NODE;
-        }
-
-        private static TagType GetTagType(string token) {
-            if (token.Length >= 4 && token.StartsWith("</")) {
-                return TagType.Closing;
-            } else if (token.Length >= 4 && token.EndsWith("/>")) {
-                return TagType.SelfClosing;
-            }
-
-            return TagType.Opening;
         }
     }
 }
