@@ -24,7 +24,7 @@ namespace HTMLParser {
                     }
                 }
 
-                if (printClosing && (level < lastLevel || level == 0)) {
+                if (printClosing && node.nodeType == NodeType.ELEMENT_NODE && (level < lastLevel || level == 0)) {
                     Console.WriteLine(string.Format("{0}</{1}>", gap, node.nodeName));
                 }
 

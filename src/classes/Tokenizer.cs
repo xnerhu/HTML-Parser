@@ -5,7 +5,6 @@ namespace HTMLParser {
     public static class Tokenizer {
         public static List<string> Tokenize(string source) {
             List<string> list = new List<string>();
-
             string text = "";
             bool capturingTag = false;
 
@@ -23,6 +22,7 @@ namespace HTMLParser {
                     list.Add(text + '>');
                     text = "";
                     capturingTag = false;
+
                     continue;
                 }
 

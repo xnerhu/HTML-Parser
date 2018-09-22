@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 
 namespace HTMLParser {
     public static class DOMBuilder {
@@ -8,7 +7,11 @@ namespace HTMLParser {
             List<Node> tree = new List<Node>();
             Node parentNode = null;
 
-            foreach (string token in tokens) {
+            List<string> openedTags = new List<string>();
+
+            for (int i = 0; i < tokens.Count; i++) {
+                string token = tokens[i];
+
                 Node node = new Node() {
                     nodeType = GetNodeType(token),
                     parentNode = parentNode
@@ -18,17 +21,29 @@ namespace HTMLParser {
                     TagType tagType = GetTagType(token);
 
                     if (tagType == TagType.Closing) {
-                        if (parentNode != null && parentNode.parentNode != null) {
-                            parentNode = parentNode.parentNode;
+                        string tokenTagName = GetTagName(token);
+                        int index = openedTags.LastIndexOf(tokenTagName);
+
+                        if (index != -1) {
+                            if (parentNode.nodeName == tokenTagName) {
+                                parentNode = parentNode.parentNode;
+                            } else {
+                                Node parent = GetParentTag(tokenTagName, parentNode.parentNode);
+
+                                if (parent != null && parent.parentNode != null) {
+                                    parentNode = parent.parentNode;
+                                }
+                            }
+
+                            openedTags.RemoveAt(index);
                         }
 
                         continue;
                     } else {
-                        node.nodeName = ExtractTagName(token);
+                        node.nodeName = GetTagName(token);
+                        parentNode = node;
 
-                        if (tagType == TagType.Opening) {
-                            parentNode = node;
-                        }
+                        openedTags.Add(node.nodeName);
                     }
                 } else {
                     node.nodeName = "#text";
@@ -45,13 +60,23 @@ namespace HTMLParser {
             return tree;
         }
 
-        private static string ExtractTagName(string token) {
+        private static Node GetParentTag(string tagName, Node node) {
+            if (node == null) return null;
+
+            if (node.nodeName == tagName) {
+                return node;
+            } else {
+                return GetParentTag(tagName, node.parentNode);
+            }
+        }
+
+        private static string GetTagName(string token) {
             string tagName = "";
 
             for (int i = 0; i < token.Length; i++) {
                 if (token[i] == '>' || token[i] == ' ') {
                     return tagName;
-                } else if (token[i] != '<') {
+                } else if (token[i] != '<' && token[i] != '/') {
                     tagName += token[i];
                 }
             }
@@ -66,7 +91,7 @@ namespace HTMLParser {
 
             return NodeType.TEXT_NODE;
         }
-        
+
         private static TagType GetTagType(string token) {
             if (token.Length >= 4 && token.StartsWith("</")) {
                 return TagType.Closing;
