@@ -21,6 +21,9 @@ namespace HTMLParser {
                 if (node.NodeType == NodeType.TEXT_NODE) {
                     Console.ForegroundColor = DefaultColors.Text;
                     Console.WriteLine(gap + node.NodeValue);
+                } else if (node.NodeType == NodeType.COMMENT_NODE) {
+                    Console.ForegroundColor = DefaultColors.Comment;
+                    Console.WriteLine(gap + string.Format("<!--{0}-->", node.NodeValue));
                 } else if (node.NodeType == NodeType.ELEMENT_NODE) {
                     Console.ForegroundColor = DefaultColors.Tag;
                     Console.WriteLine(string.Format("{0}<{1}>", gap, node.NodeName));
@@ -28,11 +31,11 @@ namespace HTMLParser {
                     if (node.ChildNodes.Count > 0) {
                         PrintChildren(node.ChildNodes, printClosing, ref lastLevel, level + 1);
                     }
-                }
 
-                if (printClosing && node.NodeType == NodeType.ELEMENT_NODE && (level < lastLevel || level == 0 || node.ParentNode.ChildNodes.Count - 1 == 0)) {
-                    Console.ForegroundColor = DefaultColors.Tag;
-                    Console.WriteLine(string.Format("{0}</{1}>", gap, node.NodeName));
+                    if (printClosing && (level < lastLevel || level == 0 || node.ParentNode.ChildNodes.Count - 1 == 0)) {
+                        Console.ForegroundColor = DefaultColors.Tag;
+                        Console.WriteLine(string.Format("{0}</{1}>", gap, node.NodeName));
+                    }
                 }
             }
         }

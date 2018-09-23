@@ -22,6 +22,9 @@ namespace HTMLParser {
                 if (node.NodeType == NodeType.TEXT_NODE) {
                     node.NodeName = "#text";
                     node.NodeValue = token;
+                } else if (node.NodeType == NodeType.COMMENT_NODE) {
+                    node.NodeName = "#comment";
+                    node.NodeValue = NodeUtils.ExtractCommentContent(token);
                 } else {
                     string tagName = TagUtils.GetTagName(token);
                     TagType tagType = TagUtils.GetTagType(token);
