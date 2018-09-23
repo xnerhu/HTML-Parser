@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace HTMLParser {
     public static class DOMBuilder {
+        /// <summary>
+        /// Builds a DOM tree from given tokens
+        /// </summary>
         public static List<Node> Build(List<string> tokens) {
             List<Node> tree = new List<Node>();
             List<string> openedTags = new List<string>();
@@ -16,18 +19,27 @@ namespace HTMLParser {
                     ParentNode = parentNode
                 };
 
-                if (node.NodeType == NodeType.ELEMENT_NODE) {
+                if (node.NodeType == NodeType.TEXT_NODE) {
+                    node.NodeName = "#text";
+                    node.NodeValue = token;
+                } else {
+                    string tagName = TagUtils.GetTagName(token);
                     TagType tagType = TagUtils.GetTagType(token);
 
-                    if (tagType == TagType.Closing) {
-                        string tokenTagName = TagUtils.GetTagName(token);
-                        int index = openedTags.LastIndexOf(tokenTagName);
+                    if (tagType == TagType.Opening) {
+                        node.NodeName = tagName;
+                        node.ChildNodes = new List<Node>();
+
+                        parentNode = node;
+                        openedTags.Add(tagName);
+                    } else {
+                        int index = openedTags.LastIndexOf(tagName);
 
                         if (index != -1) {
-                            if (parentNode.NodeName == tokenTagName) {
+                            if (parentNode.NodeName == tagName) {
                                 parentNode = parentNode.ParentNode;
                             } else {
-                                Node parent = TagUtils.GetParentTag(tokenTagName, parentNode.ParentNode);
+                                Node parent = TagUtils.GetParentTag(tagName, parentNode.ParentNode);
 
                                 if (parent != null && parent.ParentNode != null) {
                                     parentNode = parent.ParentNode;
@@ -38,16 +50,7 @@ namespace HTMLParser {
                         }
 
                         continue;
-                    } else {
-                        node.ChildNodes = new List<Node>();
-                        node.NodeName = TagUtils.GetTagName(token);
-
-                        parentNode = node;
-                        openedTags.Add(node.NodeName);
                     }
-                } else {
-                    node.NodeName = "#text";
-                    node.NodeValue = token;
                 }
 
                 if (node.ParentNode == null) {

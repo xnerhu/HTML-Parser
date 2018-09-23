@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace HTMLParser {
     public static class Tokenizer {
+        /// <summary>
+        /// Parses source code to tokens
+        /// </summary>
         public static List<string> Tokenize(string source) {
             List<string> list = new List<string>();
             string text = "";
