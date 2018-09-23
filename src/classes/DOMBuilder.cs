@@ -32,6 +32,7 @@ namespace HTMLParser {
                     if (tagType == TagType.Opening) {
                         node.NodeName = tagName;
                         node.ChildNodes = new List<Node>();
+                        node.Attributes = TagUtils.GetAttributes(token, tagName);
 
                         parentNode = node;
                         openedTags.Add(tagName);
