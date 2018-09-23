@@ -85,10 +85,6 @@ namespace HTMLParser {
                 }
             }
 
-            /*foreach (Node attr in attributes) {
-                Console.WriteLine(string.Format("Property: {0}\nValue: {1}\n", attr.NodeName, attr.NodeValue));
-            }*/
-
             return attributes;
         } 
     }
