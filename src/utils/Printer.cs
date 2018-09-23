@@ -26,7 +26,25 @@ namespace HTMLParser {
                     Console.WriteLine(gap + string.Format("<!--{0}-->", node.NodeValue));
                 } else if (node.NodeType == NodeType.ELEMENT_NODE) {
                     Console.ForegroundColor = DefaultColors.Tag;
-                    Console.WriteLine(string.Format("{0}<{1}>", gap, node.NodeName));
+                    Console.Write(string.Format("{0}<{1}", gap, node.NodeName));
+                    
+                    if (node.Attributes.Count > 0) {
+                        foreach (Node attr in node.Attributes) {
+                            Console.ForegroundColor = DefaultColors.Property;
+                            Console.Write(' ' + attr.NodeName);
+                            Console.ForegroundColor = DefaultColors.Tag;
+
+                            if (attr.NodeValue != null) {
+                                Console.Write("=\"");
+                                Console.ForegroundColor = DefaultColors.Value;
+                                Console.Write(attr.NodeValue);
+                                Console.ForegroundColor = DefaultColors.Tag;
+                                Console.Write("\"");
+                            }
+                        }
+                    }
+
+                    Console.Write(">\n");
 
                     if (node.ChildNodes.Count > 0) {
                         PrintChildren(node.ChildNodes, printClosing, ref lastLevel, level + 1);
