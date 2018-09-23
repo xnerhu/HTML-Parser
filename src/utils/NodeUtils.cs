@@ -1,12 +1,14 @@
 ﻿namespace HTMLParser {
     public static class NodeUtils {
         public static NodeType GetNodeType(string token) {
-            if (token.StartsWith("<!")) {
-                return NodeType.DOCUMENT_TYPE_NODE;
-            } else if (token.StartsWith("<!--") || token.EndsWith("-->")) {
-                return NodeType.COMMENT_NODE;
-            } else if (token.Length >= 3 && token.StartsWith('<') && token.EndsWith('>')) {
-                return NodeType.ELEMENT_NODE;
+            if (token.Length >= 3) {
+                if (token.StartsWith("<!--") || token.EndsWith("-->")) {
+                    return NodeType.COMMENT_NODE;
+                } else if (token[1] == '!') {
+                    return NodeType.DOCUMENT_TYPE_NODE;
+                } else if (token[0] == '<' && token[token.Length - 1] == '>') {
+                    return NodeType.ELEMENT_NODE;
+                }
             }
 
             return NodeType.TEXT_NODE;
