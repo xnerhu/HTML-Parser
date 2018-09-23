@@ -35,7 +35,7 @@ namespace HTMLParser {
                         }
                     }
 
-                    Console.Write(">\n");
+                    PrintColored(">\n", DefaultColors.Tag, true);
 
                     if (node.ChildNodes.Count > 0) {
                         PrintChildren(node.ChildNodes, printClosing, ref lastLevel, level + 1);

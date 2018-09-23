@@ -3,6 +3,11 @@ using System.Collections.Generic;
 
 namespace HTMLParser {
     public static class DOMBuilder {
+        public static List<string> selfClosingTags = new List<string>() {
+            "area", "base", "br", "col", "command", "embed", "hr", "img", "input",
+            "keygen", "link", "menuitem", "meta", "param", "source", "track", "wbr"
+        };
+
         /// <summary>
         /// Builds a DOM tree from given tokens
         /// </summary>
@@ -30,12 +35,16 @@ namespace HTMLParser {
                     TagType tagType = TagUtils.GetTagType(token);
 
                     if (tagType == TagType.Opening) {
-                        node.NodeName = tagName;
+                        node.NodeName = tagName.ToLower();
                         node.ChildNodes = new List<Node>();
                         node.Attributes = TagUtils.GetAttributes(token, tagName);
 
-                        parentNode = node;
-                        openedTags.Add(tagName);
+                        bool isSelfClosing = selfClosingTags.Exists(e => e == node.NodeName);
+
+                        if (!isSelfClosing) {
+                            parentNode = node;
+                            openedTags.Add(tagName);
+                        }
                     } else {
                         int index = openedTags.LastIndexOf(tagName);
 
