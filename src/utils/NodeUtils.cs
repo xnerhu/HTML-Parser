@@ -1,7 +1,9 @@
 ﻿namespace HTMLParser {
     public static class NodeUtils {
         public static NodeType GetNodeType(string token) {
-            if (token.StartsWith("<!--") || token.EndsWith("-->")) {
+            if (token.StartsWith("<!")) {
+                return NodeType.DOCUMENT_TYPE_NODE;
+            } else if (token.StartsWith("<!--") || token.EndsWith("-->")) {
                 return NodeType.COMMENT_NODE;
             } else if (token.Length >= 3 && token.StartsWith('<') && token.EndsWith('>')) {
                 return NodeType.ELEMENT_NODE;
