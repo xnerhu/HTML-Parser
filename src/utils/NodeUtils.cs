@@ -17,26 +17,36 @@ namespace HTMLParser {
             return NodeType.TEXT_NODE;
         }
 
+        /// <summary>
+        /// Extracts text from comment
+        /// </summary>
         public static string ExtractCommentContent(string token) {
-            string text = "";
             bool capturingText = false;
             int endIndex = token.Length;
+            string text = "";
 
+            // Correct comment is ended with 2 hyphens and one bracket (greater)
             if (token.EndsWith("-->")) {
                 endIndex -= 3;
             }
 
+            // Ignore bracket and hyphens at start, then get text
             for (int i = 2; i < endIndex; i++) {
                 if (!capturingText && token[i] != '<' && token[i] != '-') {
                     capturingText = true;
                 }
 
-                if (capturingText) text += token[i];
+                if (capturingText) {
+                    text += token[i];
+                }
             }
 
             return text;
         }
 
+        /// <summary>
+        /// Executes a callback for each node including it's children
+        /// </summary>
         public static void Iterate(List<Node> nodes, Predicate<Node> predicate, Action<Node> action) {
             foreach (Node node in nodes) {
                 if (predicate == null || predicate.Invoke(node)) {

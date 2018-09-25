@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace HTMLParser {
     public static class Tokenizer {
         /// <summary>
-        /// Parses source code to tokens
+        /// Parses given source code into a list of tokens
         /// </summary>
         public static List<string> Tokenize(string source) {
             List<string> list = new List<string>();

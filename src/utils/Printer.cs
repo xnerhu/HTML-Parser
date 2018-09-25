@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace HTMLParser {
     public static class Printer {
+        /// <summary>
+        /// Prints out every node in given DOM tree
+        /// </summary>
         public static void Print(List<Node> tree, bool printClosing = true) {
             int lastLevel = 0;
             PrintChildren(tree, printClosing, ref lastLevel);

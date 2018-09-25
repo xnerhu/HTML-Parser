@@ -12,7 +12,7 @@ namespace HTMLParser {
 
             return TagType.Opening;
         }
-
+      
         public static Node GetParentTag(string tagName, Node node) {
             if (node != null) {
                 if (node.NodeName == tagName) {

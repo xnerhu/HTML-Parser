@@ -14,6 +14,7 @@ namespace HTMLParser {
             List<Node> nodes = DOMBuilder.Build(tokens);
 
             if (logDetails) {
+                // Iterate every node to get info such as links count
                 NodeUtils.Iterate(nodes, null, (Node node) => {
                     if (node.NodeName == "html") {
                         DocumentElement = node;
