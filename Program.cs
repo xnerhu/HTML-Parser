@@ -3,42 +3,25 @@ using System.Text;
 
 namespace HTMLParser {
     class Program {
-        private static HTMLDocument Document;
-        private static string Content;
+        // Useful paths
+        static string AssetsPath = AppDomain.CurrentDomain.BaseDirectory + "assets/";
+        static string IndexPath = AssetsPath + "index.html";
 
-        private static void Main(string[] args) {
+        static void Main(string[] args) {
             Console.OutputEncoding = Encoding.UTF8;
 
-            Content = FileManager.ReadFile(Paths.MainHTMLDocument);
+            string path = IndexPath;
+            // Get source code
+            string sourceCode = SourceHandler.Request(new Uri(path));
 
-            // Get a DOM tree
-            // To parse a website instead of a HTML file in assets folder use
-            // new HTMLDocument("url")
-            Document = new HTMLDocument(Content);
+            HTMLDocument document = new HTMLDocument(sourceCode);
 
-            DOMElement testElement = Document.GetElementById("test");
-            testElement.InnerHTML = "<form><input type='text' placeHolder='Login'><button id='submit'>A button</button></form>";
-
-            DOMElement submitButtonElement = Document.GetElementById("submit");
-            submitButtonElement.InnerHTML = "<span>Submit</span>";
-            
-            // Write the DOM tree and the statistics
-            DOMPrinter.WriteDOMTree(Document.DOMTree);
-            WriteStatistics();
+            // Print out DOM tree
+            Printer.Print(document.Children);
+            // Print out document details such as links and scripts count
+            Printer.PrintDetails(document);
 
             Console.ReadLine();
-        }
-
-        private static void WriteStatistics() {
-            Utils.Log("\n\nTime of parsing source code to tags list",
-                Document.Stats.SourceCodeParsingTime + "ms");
-            Utils.Log("Time of parsing to a DOM tree",
-                Document.Stats.DOMTreeParsingTime + "ms");
-
-            if (Document.IsDownloaded) {
-                Utils.Log("Downloading time",
-                    Document.Stats.DownloadingTime + "ms");
-            }
         }
     }
 }

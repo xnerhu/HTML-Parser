@@ -1,7 +1,7 @@
-﻿public enum TagType {
-    Opening,
-    Closing,
-    SelfClosing,
-    Comment,
-    Text
-};
+﻿namespace HTMLParser {
+    public enum TagType {
+        Opening,
+        Closing,
+        SelfClosing
+    }
+}

@@ -1,156 +1,91 @@
-﻿namespace HTMLParser {
-    public static class TagUtils {
-        #region Parsing
+﻿using System;
+using System.Collections.Generic;
 
-        public static TagType GetType(string source) {
-            if (source[0] == '/') return TagType.Closing;
-            else if (source[source.Length - 1] == '/') return TagType.SelfClosing;
+namespace HTMLParser {
+    public static class TagUtils {
+        public static TagType GetTagType(string token) {
+            if (token.Length >= 4 && token.StartsWith("</")) {
+                return TagType.Closing;
+            } else if (token.Length >= 4 && token.EndsWith("/>")) {
+                return TagType.SelfClosing;
+            }
 
             return TagType.Opening;
         }
-
-        public static string GetCode(string source, int startIndex, int endIndex) {
-            return source.Substring(startIndex + 1, endIndex - startIndex - 1);
-        }
-
-        public static string GetName(string source) {
-            if (source.Length == 0) return null;
-
-            int startIndex = 0;
-            int endIndex = 0;
-
-            if (source[0] == '/') startIndex++;
-
-            for (int i = startIndex; i < source.Length; i++) {
-                bool isCharSpace = source[i] == ' ';
-
-                if (isCharSpace || i + 1 == source.Length) {
-                    endIndex = isCharSpace ? i - 1 : i;
-                    break;
+      
+        public static Node GetParentTag(string tagName, Node node) {
+            if (node != null) {
+                if (node.NodeName == tagName) {
+                    return node;
+                } else {
+                    return GetParentTag(tagName, node.ParentNode);
                 }
             }
 
-            return source.Substring(startIndex, endIndex - startIndex + 1).ToLower();
+            return null;
         }
 
-        public static int GetOpeningTagIndex(CList<OpeningTag> collection, string tagName) {
-            for (int i = 0; i < collection.Count; i++) {
-                if (collection[i].TagName == tagName) return i;
-            }
+        public static string GetTagName(string token) {
+            string tagName = "";
 
-            return -1;
-        }
-
-        public static CList<DOMElement> ParseDOMTreeToList(CList<DOMElement> tree) {
-            CList<DOMElement> list = new CList<DOMElement>();
-
-            for (int i = 0; i < tree.Count; i++) {
-                DOMElement element = tree[i];
-
-                list.Add(element);
-
-                if (element.Children.Count > 0) {
-                    CList<DOMElement> children = ParseDOMTreeToList(element.Children);
-
-                    for (int c = 0; c < children.Count; c++) {
-                        if (children[c].TagCode != null) {
-                            list.Add(children[c]);
-                        }
-                    }
+            for (int i = 0; i < token.Length; i++) {
+                if (token[i] == '>' || token[i] == ' ') {
+                    return tagName;
+                } else if (token[i] != '<' && token[i] != '/') {
+                    tagName += token[i];
                 }
             }
 
-            return list;
+            return null;
         }
 
-        public static bool IsTagIgnored (string tagName) {
-            tagName = tagName.ToLower();
-
-            for (int it = 0; it < HTMLSpecialList.ignoredTags.Count; it++) {
-                if (tagName == HTMLSpecialList.ignoredTags[it]) {
-                    return true;
-                }
+        public static List<Node> GetAttributes(string token, string tagName = null) {
+            if (tagName == null) {
+                tagName = GetTagName(token);
             }
 
-            return false;
-        }
+            List<Node> attributes = new List<Node>();
+            bool capturingValue = false;
 
-        public static bool IsTagSelfClosing(DOMElement element) {
-            if (element.Type == TagType.Opening) {
-                for (int l = 0; l < HTMLSpecialList.selfClosingTags.Count; l++) {
-                    if (element.TagName == HTMLSpecialList.selfClosingTags[l]) {
-                        return true;
-                    }
-                }
-            }
+            Node attribute = new Node() {
+                NodeType = NodeType.ATTRIBUTE_NODE
+            };
 
-            return false;
-        }
+            bool foundQuote = false;
 
-        public static int GetClosestClosingTagIndex(string source, int startIndex, string searchedTagName) {
-            int tagStartIndex = -1;
+            for (int i = tagName.Length + 2; i < token.Length; i++) {
+                if (!capturingValue) {
+                    if (token[i] == '=') {
+                        capturingValue = true;
 
-            for (int i = startIndex; i < source.Length; i++) {
-                if (source[i] == '<') {
-                    int tagEndIndex = Utils.SearchForClosestChar(source, '>', i + 1);
-                    string tagCode = TagUtils.GetCode(source, i, tagEndIndex);
-                    string tagName = TagUtils.GetName(tagCode);
-                    TagType tagType = TagUtils.GetType(tagCode);
+                        foundQuote = token[i + 1] == '"';
+                        if (foundQuote) i++;
+                    } else if (token[i] == ' ' || i == token.Length - 1) {
+                        attributes.Add(attribute);
 
-                    if (tagType == TagType.Closing && tagName == searchedTagName) {
-                        tagStartIndex = i;
-                        break;
-                    }
-                }
-            }
-
-            return tagStartIndex == -1 ? source.Length : tagStartIndex;
-        }
-
-        #endregion
-
-        #region Minifing
-
-        public static string MinifyHTML(CList<DOMElement> elements) {
-            string html = "";
-
-            for (int i = 0; i < elements.Count; i++) {
-                DOMElement element = elements[i];
-
-                if (element.Type != TagType.Text && element.Type != TagType.Comment) {
-                    string attrs = element.Attributes.Count > 0 ? (" " + MinifyAttributes(element.Attributes)) : "";
-
-                    html += "<" + (element.Type == TagType.Closing ? "/" : "") + element.TagName + attrs + ">";
-
-                    if (element.Children.Count > 0) {
-                        html += MinifyHTML(element.Children);
+                        attribute = new Node() {
+                            NodeType = NodeType.ATTRIBUTE_NODE
+                        };
+                    } else {
+                        attribute.NodeName += token[i];
                     }
                 } else {
-                    html += element.Content;
-                }                               
-            }
+                    if (token[i] == '"' || i == token.Length - 1 || !foundQuote && token[i] == ' ') {
+                        capturingValue = false;
+                        attributes.Add(attribute);
 
-            return html;
-        }
+                        attribute = new Node() {
+                            NodeType = NodeType.ATTRIBUTE_NODE
+                        };
 
-        private static string MinifyAttributes(CList<DOMElementAttribute> attributes) {
-            if (attributes.Count > 0) {
-                string content = "";
-
-                for (int i = 0; i < attributes.Count; i++) {
-                    DOMElementAttribute attribute = attributes[i];
-                    if (i != 0) content += ' ';
-
-                    content += attribute.Property;
-                    if (attribute.Value != null) content += "=\"" + attribute.Value + "\"";
+                        i++;
+                    } else {
+                        attribute.NodeValue += token[i];
+                    }
                 }
-
-                return content;
             }
 
-            return "";
+            return attributes;
         }
-
-        #endregion
     }
 }
