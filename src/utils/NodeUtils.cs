@@ -1,4 +1,7 @@
-﻿namespace HTMLParser {
+﻿using System;
+using System.Collections.Generic;
+
+namespace HTMLParser {
     public static class NodeUtils {
         public static NodeType GetNodeType(string token) {
             if (token.Length >= 3) {
@@ -32,6 +35,18 @@
             }
 
             return text;
+        }
+
+        public static void Iterate(List<Node> nodes, Predicate<Node> predicate, Action<Node> action) {
+            foreach (Node node in nodes) {
+                if (predicate == null || predicate.Invoke(node)) {
+                    action(node);
+                }
+
+                if (node.NodeType == NodeType.ELEMENT_NODE && node.ChildNodes.Count > 0) {
+                    Iterate(node.ChildNodes, predicate, action);
+                }
+            }
         }
     }
 }

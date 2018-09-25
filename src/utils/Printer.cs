@@ -68,5 +68,16 @@ namespace HTMLParser {
             if (!inline) Console.WriteLine(text);
             else Console.Write(text);
         }
+
+        public static void PrintDetails(HTMLDocument document) {
+            Console.WriteLine(string.Format(
+                "\nLinks count: {0}," +
+                "\nScripts count: {1}," +
+                "\nStyleSheets count: {2}",
+                document.Links.Count,
+                document.Scripts.Count,
+                document.StyleSheets.Count
+            ));
+        }
     }
 }

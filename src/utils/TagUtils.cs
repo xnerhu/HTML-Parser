@@ -86,6 +86,6 @@ namespace HTMLParser {
             }
 
             return attributes;
-        } 
+        }
     }
 }

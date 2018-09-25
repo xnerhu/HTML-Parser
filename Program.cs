@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
@@ -11,11 +10,10 @@ namespace HTMLParser {
             string indexPath = "./assets/index.html";
             string sourceCode = File.ReadAllText(indexPath, Encoding.UTF8);
 
-            List<string> tokens = Tokenizer.Tokenize(sourceCode);
-            List<Node> tree = DOMBuilder.Build(tokens);
+            HTMLDocument document = new HTMLDocument(sourceCode);
 
-            // Printer.Print(tree);
-            Printer.PrintTokens(tokens);
+            Printer.Print(document.Children);
+            Printer.PrintDetails(document);
 
             Console.ReadLine();
         }
