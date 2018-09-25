@@ -50,7 +50,16 @@ namespace HTMLParser {
 
         public static void PrintTokens(List<string> tokens) {             
             foreach (string token in tokens) {
+                NodeType type = NodeUtils.GetNodeType(token);
+
+                if (type == NodeType.ELEMENT_NODE) {
+                    Console.ForegroundColor = DefaultColors.Tag;
+                } else if (type == NodeType.TEXT_NODE) {
+                    Console.ForegroundColor = DefaultColors.Text;
+                }
+
                 Console.WriteLine(token);
+                Console.ResetColor();
             }
         }
 
